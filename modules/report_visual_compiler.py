@@ -2,20 +2,24 @@
 Report Visual Compiler Module.
 
 Converts visual definitions into fully conformed Power BI visual config structures
-with conformed bracket queryRefs (e.g. Table[Field]), projections, and prototypeQuery.
+with conformed bracket queryRefs (e.g. Table[Field]), projections, prototypeQuery,
+dataRoles, sorting, and formatting.
 """
 
 from typing import Any, Dict, List, Set, Tuple
 
 _VISUAL_TYPE_MAP = {
     "card": "card",
+    "kpi": "kpi",
     "gauge": "gauge",
     "line_chart": "lineChart",
     "clustered_bar_chart": "clusteredBarChart",
-    "donut_chart": "donutChart",
     "pie_chart": "pieChart",
+    "donut_chart": "donutChart",
     "table": "tableEx",
     "matrix": "pivotTable",
+    "column_chart": "clusteredColumnChart",
+    "map": "map",
 }
 
 
@@ -33,8 +37,8 @@ def compile_visual_config(
     Args:
         visual_id: Unique GUID or name string for the visual container.
         title: Visual title to display.
-        visual_type: Visual type (e.g. card, table, matrix, line_chart, clustered_bar_chart, donut_chart).
-        dimensions: List of dimension column strings (e.g. DimDate.month_name or DimDate[month_name]).
+        visual_type: Visual type (e.g. card, kpi, table, matrix, line_chart, clustered_bar_chart, donut_chart).
+        dimensions: List of dimension column strings (e.g. DimDate.month_name).
         measures: List of measure name strings (e.g. Total Org Determinations Override).
         position: Dictionary containing layout coordinates (x, y, width, height, z).
 
@@ -42,7 +46,8 @@ def compile_visual_config(
         A dict representing the fully compiled visual container config.
     """
     # 1. Map to official Power BI visual type string
-    pbi_type = _VISUAL_TYPE_MAP.get(visual_type.lower(), "tableEx")
+    v_type_clean = visual_type.lower().replace(" ", "_").replace("-", "_")
+    pbi_type = _VISUAL_TYPE_MAP.get(v_type_clean, "tableEx")
     
     # 2. Extract and format query references in conformed bracket format Entity[Property]
     query_fields = []
@@ -77,29 +82,47 @@ def compile_visual_config(
             "is_measure": True
         })
 
-    # 3. Build projections depending on visual type
+    # 3. Build projections and dataRoles depending on visual type
     projections = {}
+    data_roles = []
+    
+    dim_fields = [f for f in query_fields if not f["is_measure"]]
+    meas_fields = [f for f in query_fields if f["is_measure"]]
+    
     if pbi_type in ["card", "gauge"]:
         # Card/Gauge takes exactly 1 measure in Values
-        meas_fields = [f for f in query_fields if f["is_measure"]]
         projections["Values"] = [{"queryRef": f["queryRef"]} for f in meas_fields[:1]]
-    elif pbi_type in ["lineChart", "clusteredBarChart", "donutChart", "pieChart"]:
-        # Line/Bar/Donut chart: Category = first dimension, Y = measures list
-        dim_fields = [f for f in query_fields if not f["is_measure"]]
-        meas_fields = [f for f in query_fields if f["is_measure"]]
+    elif pbi_type == "kpi":
+        # KPI Card: Indicator = first measure, TrendValues = first dimension
+        projections["Indicator"] = [{"queryRef": f["queryRef"]} for f in meas_fields[:1]]
+        if dim_fields:
+            projections["TrendValues"] = [{"queryRef": dim_fields[0]["queryRef"]}]
+    elif pbi_type in ["lineChart", "clusteredBarChart", "donutChart", "pieChart", "clusteredColumnChart"]:
+        # Line/Bar/Column/Donut/Pie chart: Category = first dimension, Y = measures list
         projections["Category"] = [{"queryRef": f["queryRef"]} for f in dim_fields[:1]]
         projections["Y"] = [{"queryRef": f["queryRef"]} for f in meas_fields]
     elif pbi_type == "pivotTable":
         # Matrix: Rows = first dimension, Columns = second dimension (if any), Values = measures
-        dim_fields = [f for f in query_fields if not f["is_measure"]]
-        meas_fields = [f for f in query_fields if f["is_measure"]]
         projections["Rows"] = [{"queryRef": f["queryRef"]} for f in dim_fields[:1]]
         if len(dim_fields) > 1:
             projections["Columns"] = [{"queryRef": f["queryRef"]} for f in dim_fields[1:2]]
         projections["Values"] = [{"queryRef": f["queryRef"]} for f in meas_fields]
+    elif pbi_type == "map":
+        # Map: Category = location dimension, Size = first measure
+        projections["Category"] = [{"queryRef": f["queryRef"]} for f in dim_fields[:1]]
+        if meas_fields:
+            projections["Size"] = [{"queryRef": meas_fields[0]["queryRef"]}]
     else: # tableEx
         # Table: Values = all dimensions and measures
         projections["Values"] = [{"queryRef": f["queryRef"]} for f in query_fields]
+
+    # Populate dataRoles matching projections
+    for role, items in projections.items():
+        for idx, item in enumerate(items):
+            data_roles.append({
+                "role": role,
+                "projection": idx
+            })
 
     # 4. Build prototypeQuery (Version 2 structure)
     # Gather unique tables referenced
@@ -160,7 +183,27 @@ def compile_visual_config(
         "Select": select_list
     }
 
-    # 5. Assemble final Visual Container structure
+    # 5. Build sorting and formatting metadata
+    sorting = {}
+    if query_fields:
+        sorting = {
+            "implicit": {
+                "sortDirection": 1,  # Ascending
+                "sortBy": {
+                    "queryRef": query_fields[0]["queryRef"]
+                }
+            }
+        }
+
+    formatting = {
+        "show": True,
+        "title": {
+            "show": True,
+            "text": title
+        }
+    }
+
+    # 6. Assemble final Visual Container structure
     return {
         "name": visual_id,
         "layouts": [
@@ -178,6 +221,9 @@ def compile_visual_config(
             "visualType": pbi_type,
             "projections": projections,
             "prototypeQuery": prototype_query,
+            "dataRoles": data_roles,
+            "sorting": sorting,
+            "formatting": formatting,
             "vcObjects": {
                 "title": [
                     {
@@ -190,3 +236,4 @@ def compile_visual_config(
             }
         }
     }
+

@@ -149,7 +149,7 @@
       "displayName": "CMS Submission Dataset",
       "width": 1280,
       "height": 720,
-      "config": "{}",
+      "config": "{\"drillthroughStatus\": {\"isEnabled\": true}, \"drillthroughFilters\": [{\"expression\": {\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"f\"}}, \"Property\": \"od_number\"}}, \"filterType\": 1}]}",
       "filters": "[]",
       "visualContainers": [
         {

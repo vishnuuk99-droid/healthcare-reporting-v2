@@ -560,13 +560,38 @@ def compile_pbip_project() -> dict:
                 })
                 visual_order += 1
 
+            # Build page config with drillthrough if it is a detail/submission page
+            page_config = {}
+            page_name_lower = page_name.lower()
+            if "detail" in page_name_lower or "submission" in page_name_lower or "dataset" in page_name_lower:
+                page_config = {
+                    "drillthroughStatus": {
+                        "isEnabled": True
+                    },
+                    "drillthroughFilters": [
+                        {
+                            "expression": {
+                                "Column": {
+                                    "Expression": {
+                                        "SourceRef": {
+                                            "Source": "f"
+                                        }
+                                    },
+                                    "Property": "od_number"
+                                }
+                            },
+                            "filterType": 1
+                        }
+                    ]
+                }
+
             # Section page
             section = {
                 "name": f"Section_{page_id}",
                 "displayName": page_name,
                 "width": report_layout_data.get("canvas_size", {}).get("width", 1280),
                 "height": report_layout_data.get("canvas_size", {}).get("height", 720),
-                "config": json.dumps({}),
+                "config": json.dumps(page_config),
                 "filters": "[]",
                 "visualContainers": visual_containers
             }
@@ -639,12 +664,37 @@ def compile_pbip_project() -> dict:
                 })
                 visual_order += 1
 
+            # Build page config with drillthrough if it is a detail/submission page
+            page_config = {}
+            page_name_lower = page_name.lower()
+            if "detail" in page_name_lower or "submission" in page_name_lower or "dataset" in page_name_lower:
+                page_config = {
+                    "drillthroughStatus": {
+                        "isEnabled": True
+                    },
+                    "drillthroughFilters": [
+                        {
+                            "expression": {
+                                "Column": {
+                                    "Expression": {
+                                        "SourceRef": {
+                                            "Source": "f"
+                                        }
+                                    },
+                                    "Property": "od_number"
+                                }
+                            },
+                            "filterType": 1
+                        }
+                    ]
+                }
+
             section = {
                 "name": f"Section_{page_id}",
                 "displayName": page_name,
                 "width": 1280,
                 "height": 720,
-                "config": json.dumps({}),
+                "config": json.dumps(page_config),
                 "filters": "[]",
                 "visualContainers": visual_containers
             }

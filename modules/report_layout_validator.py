@@ -89,7 +89,7 @@ def validate_report_layout(
                     seen_visual_ids.add(v_name)
 
                 # Check: Invalid Visual Type
-                valid_pbi_types = {"card", "gauge", "lineChart", "clusteredBarChart", "donutChart", "pieChart", "tableEx", "pivotTable", "textbox", "image"}
+                valid_pbi_types = {"card", "kpi", "gauge", "lineChart", "clusteredBarChart", "pieChart", "donutChart", "tableEx", "pivotTable", "clusteredColumnChart", "map", "textbox", "image"}
                 if v_type and v_type not in valid_pbi_types:
                     issues.append({
                         "visual": v_title,
@@ -119,6 +119,51 @@ def validate_report_layout(
                             "recommendation": "Compile the report with the Report Visual Compiler to populate prototype queries."
                         })
                         
+                    # Reject tableEx for KPI or chart requirements
+                    is_kpi_or_chart_req = False
+                    spec_v_type = None
+                    for p_spec in report_def.get("pages", []):
+                        for v_spec in p_spec.get("visuals", []):
+                            if v_spec.get("title", "") == v_title:
+                                spec_v_type = v_spec.get("visual_type", "").lower()
+                                break
+                        if spec_v_type:
+                            break
+                    
+                    if spec_v_type and spec_v_type in ["card", "kpi", "line_chart", "clustered_bar_chart", "pie_chart", "donut_chart", "column_chart", "map"]:
+                        is_kpi_or_chart_req = True
+                        
+                    if is_kpi_or_chart_req and v_type == "tableEx":
+                        issues.append({
+                            "visual": v_title,
+                            "status": "Error",
+                            "issue": f"Visual '{v_title}' has visualType 'tableEx' but the requirement '{spec_v_type}' expects a KPI or chart visual.",
+                            "recommendation": "Update report visual compiler to assign correct visualType."
+                        })
+
+                    # Check required data roles
+                    if v_type == "kpi":
+                        required_roles = ["Indicator"]
+                    elif v_type in ["card", "gauge", "tableEx"]:
+                        required_roles = ["Values"]
+                    elif v_type in ["lineChart", "clusteredBarChart", "donutChart", "pieChart", "clusteredColumnChart"]:
+                        required_roles = ["Category", "Y"]
+                    elif v_type == "pivotTable":
+                        required_roles = ["Rows", "Values"]
+                    elif v_type == "map":
+                        required_roles = ["Category", "Size"]
+                    else:
+                        required_roles = []
+                        
+                    for role in required_roles:
+                        if role not in projections or not projections[role]:
+                            issues.append({
+                                "visual": v_title,
+                                "status": "Error",
+                                "issue": f"Required data role '{role}' is missing from projections for visual type '{v_type}'.",
+                                "recommendation": f"Add field bindings to satisfy '{role}' projection role."
+                            })
+
                     # Check: Missing queryRef and bindings in projections
                     if projections:
                         for proj_name, proj_list in projections.items():

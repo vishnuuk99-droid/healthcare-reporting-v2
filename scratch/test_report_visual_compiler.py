@@ -52,11 +52,11 @@ def test_visual_compiler():
     projections = single_visual["projections"]
     assert "Category" in projections
     assert len(projections["Category"]) == 1
-    assert projections["Category"][0]["queryRef"] == "DimDate.month_name"
+    assert projections["Category"][0]["queryRef"] == "DimDate[month_name]"
     
     assert "Y" in projections
     assert len(projections["Y"]) == 1
-    assert projections["Y"][0]["queryRef"] == "_Measures.Total Org Determinations Override"
+    assert projections["Y"][0]["queryRef"] == "_Measures[Total Org Determinations Override]"
 
     # Check prototypeQuery
     pq = single_visual["prototypeQuery"]
@@ -73,8 +73,8 @@ def test_visual_compiler():
     
     # Check name and column/measure mappings
     names = {s["Name"] for s in select_list}
-    assert "DimDate.month_name" in names
-    assert "_Measures.Total Org Determinations Override" in names
+    assert "DimDate[month_name]" in names
+    assert "_Measures[Total Org Determinations Override]" in names
 
     # 3. Test integration with validate_report_layout
     # Mock model
