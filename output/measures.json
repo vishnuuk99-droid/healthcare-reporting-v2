@@ -46,5 +46,117 @@
     "visuals_used_in": [
       "Adverse Decision Rate"
     ]
+  },
+  {
+    "measure_name": "Average Turnaround Time",
+    "measure_type": "Count",
+    "classification": "Base Measure",
+    "business_definition": "Average turnaround time for organization determinations in days.",
+    "formula_description": "DIVIDE(SUM(determination_key), 2, 0)",
+    "source_tables": [
+      "FactDetermination"
+    ],
+    "source_fields": [
+      "determination_key"
+    ],
+    "dependencies": [],
+    "report_pages": [
+      "Executive Summary",
+      "Data Quality"
+    ],
+    "visuals_used_in": []
+  },
+  {
+    "measure_name": "Clean Claim Rate",
+    "measure_type": "Percentage",
+    "classification": "Derived Measure",
+    "business_definition": "Percentage of clean claims submitted.",
+    "formula_description": "DIVIDE(COUNT(is_clean_claim = TRUE), COUNT(od_number))",
+    "source_tables": [
+      "FactDetermination"
+    ],
+    "source_fields": [
+      "is_clean_claim"
+    ],
+    "dependencies": [],
+    "report_pages": [
+      "Executive Summary",
+      "Data Quality"
+    ],
+    "visuals_used_in": []
+  },
+  {
+    "measure_name": "Missing Data %",
+    "measure_type": "Percentage",
+    "classification": "Derived Measure",
+    "business_definition": "Percentage of records missing key identifying fields.",
+    "formula_description": "DIVIDE(COUNT(ISBLANK(od_number)), COUNT(od_number))",
+    "source_tables": [
+      "FactDetermination"
+    ],
+    "source_fields": [
+      "od_number"
+    ],
+    "dependencies": [],
+    "report_pages": [
+      "Executive Summary",
+      "Data Quality"
+    ],
+    "visuals_used_in": []
+  },
+  {
+    "measure_name": "Validation Errors",
+    "measure_type": "Count",
+    "classification": "Derived Measure",
+    "business_definition": "Total count of validation warnings or errors in data.",
+    "formula_description": "COUNT(were_internal_plan_criteria_applied = FALSE)",
+    "source_tables": [
+      "FactDetermination"
+    ],
+    "source_fields": [
+      "were_internal_plan_criteria_applied"
+    ],
+    "dependencies": [],
+    "report_pages": [
+      "Executive Summary",
+      "Data Quality"
+    ],
+    "visuals_used_in": []
+  },
+  {
+    "measure_name": "Data Quality Score",
+    "measure_type": "Percentage",
+    "classification": "Derived Measure",
+    "business_definition": "Composite score representing data completeness and validation rate.",
+    "formula_description": "0.98 - DIVIDE(ValidationErrors, COUNTROWS)",
+    "source_tables": [
+      "FactDetermination"
+    ],
+    "source_fields": [
+      "were_internal_plan_criteria_applied"
+    ],
+    "dependencies": [],
+    "report_pages": [
+      "Executive Summary",
+      "Data Quality"
+    ],
+    "visuals_used_in": []
+  },
+  {
+    "measure_name": "Quality Trend",
+    "measure_type": "Percentage",
+    "classification": "Derived Measure",
+    "business_definition": "Historical data quality score trend.",
+    "formula_description": "DataQualityScore",
+    "source_tables": [
+      "FactDetermination"
+    ],
+    "source_fields": [],
+    "dependencies": [],
+    "report_pages": [
+      "Executive Summary",
+      "Data Quality"
+    ],
+    "visuals_used_in": []
   }
 ]

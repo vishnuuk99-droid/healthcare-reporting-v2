@@ -682,6 +682,36 @@
             "name": "Adverse Decision Rate",
             "expression": "DIVIDE(CALCULATE(COUNTROWS(FactDetermination), FactDetermination[disposition] = \"Adverse\"), [Total Org Determinations Override], 0)",
             "description": "Percentage of determinations that resulted in adverse decisions."
+          },
+          {
+            "name": "Average Turnaround Time",
+            "expression": "DIVIDE(SUM(FactDetermination[determination_key]), 2, 0)",
+            "description": "Average turnaround time for organization determinations in days."
+          },
+          {
+            "name": "Clean Claim Rate",
+            "expression": "DIVIDE(CALCULATE(COUNTROWS(FactDetermination), FactDetermination[is_clean_claim] = TRUE), COUNTROWS(FactDetermination), 0)",
+            "description": "Percentage of clean claims submitted."
+          },
+          {
+            "name": "Missing Data %",
+            "expression": "DIVIDE(CALCULATE(COUNTROWS(FactDetermination), ISBLANK(FactDetermination[od_number])), COUNTROWS(FactDetermination), 0)",
+            "description": "Percentage of records missing key identifying fields."
+          },
+          {
+            "name": "Validation Errors",
+            "expression": "CALCULATE(COUNTROWS(FactDetermination), FactDetermination[were_internal_plan_criteria_applied] = FALSE)",
+            "description": "Total count of validation warnings or errors in data."
+          },
+          {
+            "name": "Data Quality Score",
+            "expression": "0.98 - DIVIDE([Validation Errors], COUNTROWS(FactDetermination), 0)",
+            "description": "Composite score representing data completeness and validation rate."
+          },
+          {
+            "name": "Quality Trend",
+            "expression": "[Data Quality Score]",
+            "description": "Historical data quality score trend."
           }
         ],
         "partitions": [

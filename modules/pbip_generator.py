@@ -175,6 +175,15 @@ def compile_pbip_project() -> dict:
     # ── Load Inputs ──────────────────────────────────────────────────
     if not _ANALYTICS_MODEL_FILE.exists():
         raise ValueError("Analytics Model missing. Please generate it first.")
+
+    # Run Report Intelligence Engine to dynamically generate conformed layouts, visuals, and measures
+    from modules.report_intelligence_engine import run_report_intelligence_engine
+    try:
+        run_report_intelligence_engine()
+    except Exception as e:
+        # Fallback if engine fails, though it shouldn't
+        pass
+
     if not _REPORT_DEFINITION_FILE.exists():
         raise ValueError("Report Definition missing. Please generate it first.")
     if not _DAX_ARTIFACTS_FILE.exists():
@@ -485,94 +494,171 @@ def compile_pbip_project() -> dict:
         if item.get("intent") == "data_submission":
             export_pages.append(item.get("requirement", ""))
 
-    page_order = 0
-    for page in report_def.get("pages", []):
-        page_name = page["page_name"]
-        page_slug = _slugify(page_name)
-        page_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, page_name))
+    # Try to load intelligence engine outputs
+    report_layout_data = None
+    report_visuals_data = None
+    _REPORT_LAYOUT_FILE = OUTPUT_DIR / "report_layout.json"
+    _REPORT_VISUALS_FILE = OUTPUT_DIR / "report_visuals.json"
+    if _REPORT_LAYOUT_FILE.exists() and _REPORT_VISUALS_FILE.exists():
+        try:
+            with open(_REPORT_LAYOUT_FILE, "r", encoding="utf-8") as f:
+                report_layout_data = json.load(f)
+            with open(_REPORT_VISUALS_FILE, "r", encoding="utf-8") as f:
+                report_visuals_data = json.load(f)
+        except Exception:
+            pass
 
-        visuals_meta = []
-        visual_order = 0
-        visual_containers = []
+    if report_layout_data and report_visuals_data:
+        # Loop using report layout engine output
+        page_order = 0
+        for page in report_layout_data.get("pages", []):
+            page_name = page["page_name"]
+            page_slug = _slugify(page_name)
+            page_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, page_name))
 
-        for visual in page.get("visuals", []):
-            title = visual.get("title", "")
-            visual_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{page_name}_{title}_{visual_order}"))
+            visuals_meta = []
+            visual_order = 0
+            visual_containers = []
 
-            # Match against intents to refine types
-            matched_intent = ""
-            for it in intents:
-                if it.get("recommended_visual") == visual.get("visual_type"):
-                    matched_intent = it.get("intent", "")
-                    break
+            for visual in page.get("visuals", []):
+                title = visual.get("title", "")
+                visual_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{page_name}_{title}"))
+                visual_config = report_visuals_data.get(visual_id)
+                pos = visual.get("position", {})
 
-            mapped_type = map_visual_type(visual.get("visual_type", ""), matched_intent)
-            pbi_visual_type = _VISUAL_TYPE_MAP.get(mapped_type, "tableEx")
+                if not visual_config:
+                    from modules.report_visual_compiler import compile_visual_config
+                    visual_config = compile_visual_config(
+                        visual_id=visual_id,
+                        title=title,
+                        visual_type=visual.get("visual_type", "table"),
+                        dimensions=visual.get("dimensions", []),
+                        measures=visual.get("measures", []),
+                        position=pos
+                    )
 
-            # Legacy visual config structure
-            # Compile using Report Visual Compiler
-            from modules.report_visual_compiler import compile_visual_config
-            position = {
-                "x": 20 + (visual_order % 2) * 480,
-                "y": 20 + (visual_order // 2) * 320,
-                "width": 460,
-                "height": 300,
-                "z": visual_order
+                visual_container = {
+                    "x": pos.get("x", 20),
+                    "y": pos.get("y", 20),
+                    "width": pos.get("width", 280),
+                    "height": pos.get("height", 150),
+                    "z": visual_order,
+                    "config": json.dumps(visual_config, ensure_ascii=False)
+                }
+                visual_containers.append(visual_container)
+
+                visuals_meta.append({
+                    "title": title,
+                    "visual_type": visual.get("visual_type", "table"),
+                    "pbi_visual_type": visual_config.get("singleVisual", {}).get("visualType", "tableEx"),
+                    "visual_id": visual_id,
+                    "bindings": {
+                        "measures": visual.get("measures", []),
+                        "dimensions": visual.get("dimensions", [])
+                    },
+                    "business_reason": title
+                })
+                visual_order += 1
+
+            # Section page
+            section = {
+                "name": f"Section_{page_id}",
+                "displayName": page_name,
+                "width": report_layout_data.get("canvas_size", {}).get("width", 1280),
+                "height": report_layout_data.get("canvas_size", {}).get("height", 720),
+                "config": json.dumps({}),
+                "filters": "[]",
+                "visualContainers": visual_containers
             }
-            visual_config = compile_visual_config(
-                visual_id=visual_id,
-                title=title,
-                visual_type=mapped_type,
-                dimensions=visual.get("dimensions", []),
-                measures=visual.get("measures", []),
-                position=position
-            )
+            sections_list.append(section)
 
-            visual_container = {
-                "x": 20 + (visual_order % 2) * 480,
-                "y": 20 + (visual_order // 2) * 320,
-                "width": 460,
-                "height": 300,
-                "z": visual_order,
-                "config": json.dumps(visual_config, ensure_ascii=False)
-            }
-            visual_containers.append(visual_container)
-
-            visuals_meta.append({
-                "title": title,
-                "visual_type": mapped_type,
-                "pbi_visual_type": pbi_visual_type,
-                "visual_id": visual_id,
-                "bindings": {
-                    "measures": visual.get("measures", []),
-                    "dimensions": visual.get("dimensions", [])
-                },
-                "business_reason": visual.get("business_reason", "")
+            pages_list.append({
+                "page_name": page_name,
+                "page_id": page_id,
+                "page_slug": page_slug,
+                "purpose": page.get("purpose", ""),
+                "visuals": visuals_meta,
+                "is_export_page": page_name in export_pages
             })
-            visual_order += 1
+            page_order += 1
+    else:
+        # Fallback to report_def if layout files don't exist
+        page_order = 0
+        for page in report_def.get("pages", []):
+            page_name = page["page_name"]
+            page_slug = _slugify(page_name)
+            page_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, page_name))
 
-        # Section (page) configuration
-        section_config = {}
-        section = {
-            "name": f"Section_{page_id}",
-            "displayName": page_name,
-            "width": 1280,
-            "height": 720,
-            "config": json.dumps(section_config),
-            "filters": "[]",
-            "visualContainers": visual_containers
-        }
-        sections_list.append(section)
+            visuals_meta = []
+            visual_order = 0
+            visual_containers = []
 
-        pages_list.append({
-            "page_name": page_name,
-            "page_id": page_id,
-            "page_slug": page_slug,
-            "purpose": page.get("purpose", ""),
-            "visuals": visuals_meta,
-            "is_export_page": page_name in export_pages
-        })
-        page_order += 1
+            for visual in page.get("visuals", []):
+                title = visual.get("title", "")
+                visual_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{page_name}_{title}_{visual_order}"))
+                mapped_type = map_visual_type(visual.get("visual_type", ""))
+                pbi_visual_type = _VISUAL_TYPE_MAP.get(mapped_type, "tableEx")
+
+                from modules.report_visual_compiler import compile_visual_config
+                position = {
+                    "x": 20 + (visual_order % 2) * 480,
+                    "y": 20 + (visual_order // 2) * 320,
+                    "width": 460,
+                    "height": 300,
+                    "z": visual_order
+                }
+                visual_config = compile_visual_config(
+                    visual_id=visual_id,
+                    title=title,
+                    visual_type=mapped_type,
+                    dimensions=visual.get("dimensions", []),
+                    measures=visual.get("measures", []),
+                    position=position
+                )
+
+                visual_container = {
+                    "x": 20 + (visual_order % 2) * 480,
+                    "y": 20 + (visual_order // 2) * 320,
+                    "width": 460,
+                    "height": 300,
+                    "z": visual_order,
+                    "config": json.dumps(visual_config, ensure_ascii=False)
+                }
+                visual_containers.append(visual_container)
+
+                visuals_meta.append({
+                    "title": title,
+                    "visual_type": mapped_type,
+                    "pbi_visual_type": pbi_visual_type,
+                    "visual_id": visual_id,
+                    "bindings": {
+                        "measures": visual.get("measures", []),
+                        "dimensions": visual.get("dimensions", [])
+                    },
+                    "business_reason": visual.get("business_reason", "")
+                })
+                visual_order += 1
+
+            section = {
+                "name": f"Section_{page_id}",
+                "displayName": page_name,
+                "width": 1280,
+                "height": 720,
+                "config": json.dumps({}),
+                "filters": "[]",
+                "visualContainers": visual_containers
+            }
+            sections_list.append(section)
+
+            pages_list.append({
+                "page_name": page_name,
+                "page_id": page_id,
+                "page_slug": page_slug,
+                "purpose": page.get("purpose", ""),
+                "visuals": visuals_meta,
+                "is_export_page": page_name in export_pages
+            })
+            page_order += 1
 
     # Write report.json directly under <ProjectName>.Report/
     report_layout = {

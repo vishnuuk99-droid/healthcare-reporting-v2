@@ -1,19 +1,21 @@
 """
 Report Visual Compiler Module.
 
-Converts visual definitions in report_definition.json into fully bound Power BI
-visual config structures with valid projections, queryRefs, and prototypeQuery.
+Converts visual definitions into fully conformed Power BI visual config structures
+with conformed bracket queryRefs (e.g. Table[Field]), projections, and prototypeQuery.
 """
 
 from typing import Any, Dict, List, Set, Tuple
 
-
 _VISUAL_TYPE_MAP = {
-    "Card": "card",
-    "Table": "tableEx",
-    "Matrix": "pivotTable",
-    "Line Chart": "lineChart",
-    "Bar Chart": "clusteredBarChart",
+    "card": "card",
+    "gauge": "gauge",
+    "line_chart": "lineChart",
+    "clustered_bar_chart": "clusteredBarChart",
+    "donut_chart": "donutChart",
+    "pie_chart": "pieChart",
+    "table": "tableEx",
+    "matrix": "pivotTable",
 }
 
 
@@ -31,8 +33,8 @@ def compile_visual_config(
     Args:
         visual_id: Unique GUID or name string for the visual container.
         title: Visual title to display.
-        visual_type: Visual type (e.g. Card, Table, Matrix, Line Chart, Bar Chart).
-        dimensions: List of dimension column strings (e.g. DimDate.month_name).
+        visual_type: Visual type (e.g. card, table, matrix, line_chart, clustered_bar_chart, donut_chart).
+        dimensions: List of dimension column strings (e.g. DimDate.month_name or DimDate[month_name]).
         measures: List of measure name strings (e.g. Total Org Determinations Override).
         position: Dictionary containing layout coordinates (x, y, width, height, z).
 
@@ -40,30 +42,36 @@ def compile_visual_config(
         A dict representing the fully compiled visual container config.
     """
     # 1. Map to official Power BI visual type string
-    pbi_type = _VISUAL_TYPE_MAP.get(visual_type, "tableEx")
+    pbi_type = _VISUAL_TYPE_MAP.get(visual_type.lower(), "tableEx")
     
-    # 2. Extract and format query references
-    # All dimensions/measures should be referenced in projections as Table.Name
+    # 2. Extract and format query references in conformed bracket format Entity[Property]
     query_fields = []
     
     for d in dimensions:
-        if "." in d:
+        if "[" in d and d.endswith("]"):
+            tbl, col = d[:-1].split("[", 1)
+        elif "." in d:
             tbl, col = d.split(".", 1)
         else:
             tbl = "DimPatient" # fallback table prefix
             col = d
         query_fields.append({
-            "queryRef": f"{tbl}.{col}",
+            "queryRef": f"{tbl}[{col}]",
             "table": tbl,
             "property": col,
             "is_measure": False
         })
         
     for m in measures:
-        m_clean = m.split(".", 1)[1] if "." in m else m
-        tbl = "_Measures"
+        if "[" in m and m.endswith("]"):
+            tbl, m_clean = m[:-1].split("[", 1)
+        elif "." in m:
+            tbl, m_clean = m.split(".", 1)
+        else:
+            tbl = "_Measures"
+            m_clean = m
         query_fields.append({
-            "queryRef": f"{tbl}.{m_clean}",
+            "queryRef": f"{tbl}[{m_clean}]",
             "table": tbl,
             "property": m_clean,
             "is_measure": True
@@ -75,8 +83,8 @@ def compile_visual_config(
         # Card/Gauge takes exactly 1 measure in Values
         meas_fields = [f for f in query_fields if f["is_measure"]]
         projections["Values"] = [{"queryRef": f["queryRef"]} for f in meas_fields[:1]]
-    elif pbi_type == "lineChart" or pbi_type == "clusteredBarChart":
-        # Line/Bar chart: Category = first dimension, Y = measures list
+    elif pbi_type in ["lineChart", "clusteredBarChart", "donutChart", "pieChart"]:
+        # Line/Bar/Donut chart: Category = first dimension, Y = measures list
         dim_fields = [f for f in query_fields if not f["is_measure"]]
         meas_fields = [f for f in query_fields if f["is_measure"]]
         projections["Category"] = [{"queryRef": f["queryRef"]} for f in dim_fields[:1]]

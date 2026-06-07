@@ -1,14 +1,14 @@
 {
   "project_name": "CMS Organization Determinations, Appeals, and Grievances Report",
   "project_slug": "CMS_Organization_Determinations_Appeals_and_Grievances_Report",
-  "generated_at": "2026-06-08T01:43:34.602251",
+  "generated_at": "2026-06-08T01:58:36.285104",
   "pbip_spec_version": "1.0",
   "pbir_version": "1.0",
   "stats": {
     "tables_count": 9,
-    "measures_count": 2,
-    "pages_count": 3,
-    "visuals_count": 6,
+    "measures_count": 8,
+    "pages_count": 4,
+    "visuals_count": 16,
     "relationships_count": 22
   },
   "contents": {
@@ -25,12 +25,19 @@
     ],
     "measures": [
       "Total Org Determinations Override",
-      "Adverse Decision Rate"
+      "Adverse Decision Rate",
+      "Average Turnaround Time",
+      "Clean Claim Rate",
+      "Missing Data %",
+      "Validation Errors",
+      "Data Quality Score",
+      "Quality Trend"
     ],
     "pages": [
       "Executive Summary",
       "Determinations Analysis",
-      "Detail Listing"
+      "Data Quality",
+      "CMS Submission Dataset"
     ]
   }
 }

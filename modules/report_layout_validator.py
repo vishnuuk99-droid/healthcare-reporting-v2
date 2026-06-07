@@ -2,7 +2,7 @@
 Report Layout Validator Module.
 
 Validates report.json against the semantic model (model.bim) before PBIP packaging.
-Performs 7 checks to ensure layout and semantic bindings are valid and in sync.
+Performs 8 checks to ensure layout, visual configurations, and bindings are valid.
 """
 
 import json
@@ -28,13 +28,7 @@ def validate_report_layout(
         report_def: The dictionary loaded from report_definition.json.
 
     Returns:
-        A list of validation issues found:
-        {
-            "visual": str,          # Name/title of the visual
-            "status": str,          # "Error" | "Warning"
-            "issue": str,           # Issue description
-            "recommendation": str   # Recommendation to fix the issue
-        }
+        A list of validation issues found.
     """
     issues = []
 
@@ -48,14 +42,13 @@ def validate_report_layout(
         cols = {c.get("name", "") for c in t.get("columns", [])}
         tables_dict[t_name] = cols
         
-        # Measures can be located in any table in model.bim
         for m in t.get("measures", []):
             measures_set.add(m.get("name", ""))
 
     # ── 2. Run Checks ──────────────────────────────────────────────────
-    # Map visualContainer titles from report.json to check for orphans
     report_visual_titles = set()
     report_visual_by_title = {}
+    seen_visual_ids = set()
 
     sections = report_data.get("sections", [])
     for sec in sections:
@@ -84,6 +77,27 @@ def validate_report_layout(
                     "page": page_name
                 }
                 
+                # Check: Duplicate Visual IDs
+                if v_name:
+                    if v_name in seen_visual_ids:
+                        issues.append({
+                            "visual": v_title,
+                            "status": "Error",
+                            "issue": f"Duplicate visual ID '{v_name}' detected in layout.",
+                            "recommendation": "Ensure visual container IDs generated are unique."
+                        })
+                    seen_visual_ids.add(v_name)
+
+                # Check: Invalid Visual Type
+                valid_pbi_types = {"card", "gauge", "lineChart", "clusteredBarChart", "donutChart", "pieChart", "tableEx", "pivotTable", "textbox", "image"}
+                if v_type and v_type not in valid_pbi_types:
+                    issues.append({
+                        "visual": v_title,
+                        "status": "Error",
+                        "issue": f"Invalid Power BI visual type '{v_type}' detected.",
+                        "recommendation": f"Use one of conformed types: {list(valid_pbi_types)}"
+                    })
+
                 # Check: Reject visuals with empty projections or prototypeQuery
                 if v_type not in ["textbox", "image"]:
                     single_visual = config.get("singleVisual", {})
@@ -104,6 +118,30 @@ def validate_report_layout(
                             "issue": f"Visual '{v_title}' has empty prototypeQuery schema definition.",
                             "recommendation": "Compile the report with the Report Visual Compiler to populate prototype queries."
                         })
+                        
+                    # Check: Missing queryRef and bindings in projections
+                    if projections:
+                        for proj_name, proj_list in projections.items():
+                            for proj_item in proj_list:
+                                qref = proj_item.get("queryRef", "")
+                                if not qref:
+                                    issues.append({
+                                        "visual": v_title,
+                                        "status": "Error",
+                                        "issue": f"Visual '{v_title}' has a projection item with missing queryRef.",
+                                        "recommendation": "Recompile visual config to generate query references."
+                                    })
+                                else:
+                                    # Ensure queryRef is bound in prototypeQuery select list
+                                    select_items = prototype_query.get("Select", []) if isinstance(prototype_query, dict) else []
+                                    select_names = {s.get("Name", "") for s in select_items}
+                                    if qref not in select_names:
+                                        issues.append({
+                                            "visual": v_title,
+                                            "status": "Error",
+                                            "issue": f"QueryRef '{qref}' in projections is missing from prototypeQuery Select.",
+                                            "recommendation": "Synchronize projections and prototypeQuery SELECT properties."
+                                        })
             except Exception:
                 pass
 
@@ -122,7 +160,7 @@ def validate_report_layout(
                 "page": p_name
             })
 
-    # Check 5: Detect Orphan Visual References
+    # Check: Detect Orphan Visual References
     # (a) Visual in spec but missing from layout
     for v_title in spec_visual_titles:
         if v_title not in report_visual_titles:
@@ -135,7 +173,6 @@ def validate_report_layout(
 
     # (b) Visual in layout but missing from spec
     for v_title, info in report_visual_by_title.items():
-        # Exclude common system/helper visual elements if any
         if v_title not in spec_visual_titles and info["type"] not in ["textbox", "image"]:
             issues.append({
                 "visual": v_title,
@@ -151,57 +188,67 @@ def validate_report_layout(
         dims = v.get("dimensions", [])
         meas = v.get("measures", [])
 
-        # Check 1, 2, 3, 6: Bindings Validation (Fields, Tables, Measures, Stale check)
+        # Check: Bindings Validation (Fields, Tables, Measures)
         for d_field in dims:
-            if "." in d_field:
+            # Support both DimDate.Month and DimDate[Month] syntax
+            if "[" in d_field and d_field.endswith("]"):
+                tbl, col = d_field[:-1].split("[", 1)
+            elif "." in d_field:
                 tbl, col = d_field.split(".", 1)
-                # Check 2: Table exists
-                if tbl not in tables_dict:
-                    issues.append({
-                        "visual": title,
-                        "status": "Error",
-                        "issue": f"Table '{tbl}' referenced in dimension '{d_field}' does not exist in model.bim.",
-                        "recommendation": f"Verify if '{tbl}' was renamed or omitted during star schema generation."
-                    })
-                # Check 1: Field exists in table
-                elif col not in tables_dict[tbl]:
-                    issues.append({
-                        "visual": title,
-                        "status": "Error",
-                        "issue": f"Column '{col}' in table '{tbl}' does not exist in model.bim.",
-                        "recommendation": f"Verify if column '{col}' is named correctly in table '{tbl}'."
-                    })
             else:
                 # Column referenced without table name
                 found = False
-                for tbl, cols in tables_dict.items():
+                for tbl_name, cols in tables_dict.items():
                     if d_field in cols:
                         found = True
+                        tbl, col = tbl_name, d_field
                         break
                 if not found:
                     issues.append({
                         "visual": title,
                         "status": "Error",
                         "issue": f"Dimension field '{d_field}' does not exist in any table of model.bim.",
-                        "recommendation": f"Specify field with table prefix (e.g. Table.Field) and verify spelling."
+                        "recommendation": "Specify field with table prefix (e.g. Table.Field) and verify spelling."
                     })
+                    continue
+
+            # Check: Table exists
+            if tbl not in tables_dict:
+                issues.append({
+                    "visual": title,
+                    "status": "Error",
+                    "issue": f"Table '{tbl}' referenced in dimension '{d_field}' does not exist in model.bim.",
+                    "recommendation": f"Verify if '{tbl}' was renamed or omitted during star schema generation."
+                })
+            # Check: Field exists in table
+            elif col not in tables_dict[tbl]:
+                issues.append({
+                    "visual": title,
+                    "status": "Error",
+                    "issue": f"Column '{col}' in table '{tbl}' does not exist in model.bim.",
+                    "recommendation": f"Verify if column '{col}' is named correctly in table '{tbl}'."
+                })
 
         for m_field in meas:
-            # Check 3: Measure exists
-            if m_field not in measures_set:
-                # Also check if it's referenced as Table.Measure
-                m_clean = m_field.split(".", 1)[1] if "." in m_field else m_field
-                if m_clean not in measures_set:
-                    issues.append({
-                        "visual": title,
-                        "status": "Error",
-                        "issue": f"Measure '{m_field}' does not exist in model.bim.",
-                        "recommendation": f"Verify if the measure '{m_field}' was compiled in dax_artifacts.json."
-                    })
+            # Support both _Measures[Total] and _Measures.Total and native Total
+            if "[" in m_field and m_field.endswith("]"):
+                m_clean = m_field[:-1].split("[", 1)[1]
+            elif "." in m_field:
+                m_clean = m_field.split(".", 1)[1]
+            else:
+                m_clean = m_field
 
-        # Check 4: Visual type required properties
-        # card / gauge constraints
-        if v_type in ["card", "gauge"]:
+            if m_clean not in measures_set:
+                issues.append({
+                    "visual": title,
+                    "status": "Error",
+                    "issue": f"Measure '{m_field}' does not exist in model.bim.",
+                    "recommendation": f"Verify if the measure '{m_field}' was compiled in dax_artifacts.json."
+                })
+
+        # Check: Visual type required properties
+        v_type_lower = v_type.lower()
+        if v_type_lower in ["card", "gauge"]:
             if len(meas) != 1:
                 issues.append({
                     "visual": title,
@@ -216,8 +263,7 @@ def validate_report_layout(
                     "issue": f"Visual type '{v_type}' contains {len(dims)} dimensions. Cards/gauges do not display dimensions.",
                     "recommendation": "Remove dimensions from the card visual definition."
                 })
-        # charts requirements
-        elif v_type in ["line_chart", "bar_chart", "donut_chart", "pie_chart", "column_chart"]:
+        elif v_type_lower in ["line_chart", "bar_chart", "donut_chart", "pie_chart", "column_chart", "clustered_bar_chart"]:
             if len(dims) < 1:
                 issues.append({
                     "visual": title,
@@ -232,8 +278,7 @@ def validate_report_layout(
                     "issue": f"Visual chart '{v_type}' contains 0 measures. Charts require at least 1 metric measure to plot.",
                     "recommendation": "Add at least one measure (e.g. [Total Determinations]) to the visual."
                 })
-        # matrix requirements
-        elif v_type == "matrix":
+        elif v_type_lower == "matrix":
             if len(dims) < 1:
                 issues.append({
                     "visual": title,
@@ -241,8 +286,7 @@ def validate_report_layout(
                     "issue": f"Matrix visual requires at least 1 dimension to define rows/columns.",
                     "recommendation": "Add row/column dimensions."
                 })
-        # table requirements
-        elif v_type == "table":
+        elif v_type_lower == "table":
             if len(dims) == 0 and len(meas) == 0:
                 issues.append({
                     "visual": title,
@@ -260,13 +304,8 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
     synchronize with model.bim, recompile PBIP, and rerun validation.
 
     Returns:
-        applied_fixes: List of fixes applied:
-        {
-            "visual": str,
-            "issue": str,
-            "fix_applied": str
-        }
-        validation_results: Dict containing the layout validation results.
+        applied_fixes: List of fixes applied.
+        validation_results: Dict containing layout validation results.
     """
     from modules.pbip_generator import get_project_slug
     import shutil
@@ -286,8 +325,6 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
         analytics_model = json.load(f)
 
     # ── 1. Map columns and measures ───────────────────────────────────
-    # Map column names in analytics model to their tables
-    # col_name -> list of table_names containing this column
     model_columns_map = {}
     valid_tables = set()
     for t in analytics_model.get("fact_tables", []) + analytics_model.get("dimension_tables", []):
@@ -306,12 +343,9 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
             dax_list = json.load(f)
             available_measures.update(m.get("measure_name", "") for m in dax_list)
     else:
-        # Fallback to report_definition measures spec
         available_measures.update(m.get("name", "") for m in report_def.get("measures", []))
 
     applied_fixes = []
-
-    # Helper to clean up table name replacements
     table_replacements = {} # old_table -> new_table
 
     # ── 2. Fix visuals field bindings ──────────────────────────────────
@@ -324,13 +358,22 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
             # (a) Check dimensions
             corrected_dims = []
             for d_field in v.get("dimensions", []):
-                if "." in d_field:
+                # Support both dot and bracket
+                if "[" in d_field and d_field.endswith("]"):
+                    tbl, col = d_field[:-1].split("[", 1)
+                    is_bracket = True
+                elif "." in d_field:
                     tbl, col = d_field.split(".", 1)
+                    is_bracket = False
+                else:
+                    tbl, col = "", d_field
+                    is_bracket = False
+
+                if tbl:
                     if tbl not in valid_tables:
-                        # Remap table name based on column existence
                         if col in model_columns_map:
-                            new_tbl = model_columns_map[col][0] # Pick first table containing this column
-                            corrected_dims.append(f"{new_tbl}.{col}")
+                            new_tbl = model_columns_map[col][0]
+                            corrected_dims.append(f"{new_tbl}[{col}]" if is_bracket else f"{new_tbl}.{col}")
                             table_replacements[tbl] = new_tbl
                             applied_fixes.append({
                                 "visual": title,
@@ -338,11 +381,10 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
                                 "fix_applied": f"Remapped field to '{new_tbl}.{col}' (found column in '{new_tbl}')."
                             })
                         else:
-                            # Let's see if we can find a table that is similar
                             similar_tables = difflib.get_close_matches(tbl, list(valid_tables), n=1, cutoff=0.5)
                             if similar_tables:
                                 new_tbl = similar_tables[0]
-                                corrected_dims.append(f"{new_tbl}.{col}")
+                                corrected_dims.append(f"{new_tbl}[{col}]" if is_bracket else f"{new_tbl}.{col}")
                                 table_replacements[tbl] = new_tbl
                                 applied_fixes.append({
                                     "visual": title,
@@ -350,18 +392,16 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
                                     "fix_applied": f"Remapped table '{tbl}' to '{new_tbl}' (similar table name)."
                                 })
                             else:
-                                corrected_dims.append(d_field) # keep original if no match
+                                corrected_dims.append(d_field)
                     else:
                         corrected_dims.append(d_field)
                 else:
-                    # Column without table prefix
                     if d_field not in model_columns_map:
-                        # Try case insensitive match or fuzzy match
                         similar_cols = difflib.get_close_matches(d_field, list(model_columns_map.keys()), n=1, cutoff=0.6)
                         if similar_cols:
                             new_col = similar_cols[0]
                             new_tbl = model_columns_map[new_col][0]
-                            corrected_dims.append(f"{new_tbl}.{new_col}")
+                            corrected_dims.append(f"{new_tbl}[{new_col}]" if is_bracket else f"{new_tbl}.{new_col}")
                             applied_fixes.append({
                                 "visual": title,
                                 "issue": f"Field '{d_field}' is missing from the model.",
@@ -371,7 +411,7 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
                             corrected_dims.append(d_field)
                     else:
                         new_tbl = model_columns_map[d_field][0]
-                        corrected_dims.append(f"{new_tbl}.{d_field}")
+                        corrected_dims.append(f"{new_tbl}[{d_field}]" if is_bracket else f"{new_tbl}.{d_field}")
                         applied_fixes.append({
                             "visual": title,
                             "issue": f"Field '{d_field}' is missing table prefix.",
@@ -382,9 +422,14 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
             # (b) Check measures list
             corrected_meas = []
             for m_field in v.get("measures", []):
-                m_clean = m_field.split(".", 1)[1] if "." in m_field else m_field
+                if "[" in m_field and m_field.endswith("]"):
+                    m_clean = m_field[:-1].split("[", 1)[1]
+                elif "." in m_field:
+                    m_clean = m_field.split(".", 1)[1]
+                else:
+                    m_clean = m_field
+
                 if m_clean not in available_measures:
-                    # Find closest matching measure in the model
                     similar_measures = difflib.get_close_matches(m_clean, list(available_measures), n=1, cutoff=0.4)
                     if similar_measures:
                         new_measure = similar_measures[0]
@@ -401,7 +446,8 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
             v["measures"] = corrected_meas
 
             # (c) Validate visual properties and fix constraints
-            if v_type in ["card", "gauge"]:
+            v_type_lower = v_type.lower()
+            if v_type_lower in ["card", "gauge"]:
                 if len(v["measures"]) > 1:
                     orig_count = len(v["measures"])
                     v["measures"] = [v["measures"][0]]
@@ -417,19 +463,16 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
                         "issue": f"Visual type '{v_type}' contains dimensions.",
                         "fix_applied": "Removed dimensions from visual definition as cards/gauges do not display them."
                     })
-            elif v_type in ["line_chart", "bar_chart", "donut_chart", "pie_chart", "column_chart"]:
+            elif v_type_lower in ["line_chart", "bar_chart", "donut_chart", "pie_chart", "column_chart", "clustered_bar_chart"]:
                 if len(v.get("dimensions", [])) == 0:
-                    # Add DimDate.month_name as default axis if it exists
                     default_dim = "DimDate.month_name"
                     if "DimDate" in valid_tables and "month_name" in model_columns_map.get("month_name", []):
                         v["dimensions"] = [default_dim]
                     else:
-                        # Find any dimension column
                         found_dim = None
                         for tbl in valid_tables:
                             if tbl.startswith("Dim") and tbl != "DimDate":
                                 cols = list(model_columns_map.keys())
-                                # Pick first non-key column in dimension
                                 for c in cols:
                                     if tbl in model_columns_map[c] and not c.endswith("_key") and not c.endswith("_id"):
                                         found_dim = f"{tbl}.{c}"
@@ -445,7 +488,6 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
                         "fix_applied": f"Assigned default dimension: '{dim_desc}'."
                     })
                 if len(v.get("measures", [])) == 0:
-                    # Assign first available measure
                     if available_measures:
                         v["measures"] = [list(available_measures)[0]]
                         applied_fixes.append({
@@ -458,20 +500,27 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
     if "filters" in report_def:
         for filt in report_def["filters"]:
             f_field = filt.get("field", "")
-            if "." in f_field:
+            if "[" in f_field and f_field.endswith("]"):
+                tbl, col = f_field[:-1].split("[", 1)
+                is_bracket = True
+            elif "." in f_field:
                 tbl, col = f_field.split(".", 1)
-                if tbl not in valid_tables:
-                    if col in model_columns_map:
-                        new_tbl = model_columns_map[col][0]
-                        filt["field"] = f"{new_tbl}.{col}"
-                        applied_fixes.append({
-                            "visual": f"Filter: {filt.get('name', 'Unnamed')}",
-                            "issue": f"Filter references missing table '{tbl}'.",
-                            "fix_applied": f"Remapped to '{new_tbl}.{col}'."
-                        })
+                is_bracket = False
+            else:
+                tbl, col = "", f_field
+                is_bracket = False
+
+            if tbl and tbl not in valid_tables:
+                if col in model_columns_map:
+                    new_tbl = model_columns_map[col][0]
+                    filt["field"] = f"{new_tbl}[{col}]" if is_bracket else f"{new_tbl}.{col}"
+                    applied_fixes.append({
+                        "visual": f"Filter: {filt.get('name', 'Unnamed')}",
+                        "issue": f"Filter references missing table '{tbl}'.",
+                        "fix_applied": f"Remapped to '{new_tbl}.{col}'."
+                    })
 
     # ── 4. Synchronize dax_artifacts.json if tables were remapped ─────
-    # E.g. replace FactObservation with FactDetermination in expressions
     if dax_path.exists() and table_replacements:
         try:
             with open(dax_path, "r", encoding="utf-8") as f:
@@ -497,7 +546,6 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
         except Exception:
             pass
 
-    # Synchronize measures.json if tables were remapped
     if measures_path.exists() and table_replacements:
         try:
             with open(measures_path, "r", encoding="utf-8") as f:
@@ -505,7 +553,6 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
             
             m_modified = False
             for m in m_list:
-                # 1. Update dax_expression if it exists
                 expr = m.get("dax_expression", "")
                 if expr:
                     for old_t, new_t in table_replacements.items():
@@ -514,7 +561,6 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
                             m["dax_expression"] = expr
                             m_modified = True
                 
-                # 2. Update formula_description
                 formula_desc = m.get("formula_description", "")
                 if formula_desc:
                     for old_t, new_t in table_replacements.items():
@@ -523,7 +569,6 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
                             m["formula_description"] = formula_desc
                             m_modified = True
                             
-                # 3. Update source_tables list
                 src_tables = m.get("source_tables", [])
                 if isinstance(src_tables, list):
                     new_src_tables = []
@@ -538,7 +583,6 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
                         m["source_tables"] = new_src_tables
                         m_modified = True
                         
-                # 4. Update home_table if it exists
                 ht = m.get("home_table", "")
                 if ht in table_replacements:
                     m["home_table"] = table_replacements[ht]
@@ -554,7 +598,6 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
     with open(report_def_path, "w", encoding="utf-8") as f:
         json.dump(report_def, f, indent=2)
 
-    # Compile the PBIP project (this recreates report.json and model.bim)
     compile_result = compile_pbip_project()
 
     # Rerun validation
@@ -579,8 +622,6 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
 def validate_report_layout_from_files() -> List[Dict[str, str]]:
     """
     Helper to run layout validation directly using files on disk.
-    If PBIP has not been compiled, it creates transient mock layouts
-    and model schemas based on upstream json configurations.
     """
     from modules.pbip_generator import get_project_slug
     from modules.file_manager import OUTPUT_DIR
@@ -603,7 +644,6 @@ def validate_report_layout_from_files() -> List[Dict[str, str]]:
         report_def = json.load(f)
 
     if not model_bim_path.exists():
-        # Fall back to analytics_model.json
         analytics_model_path = OUTPUT_DIR / "analytics_model.json"
         if not analytics_model_path.exists():
             return [{
@@ -616,7 +656,6 @@ def validate_report_layout_from_files() -> List[Dict[str, str]]:
         with open(analytics_model_path, "r", encoding="utf-8") as f:
             analytics_model = json.load(f)
             
-        # Mock a minimal model.bim structure for validation
         model_data = {"model": {"tables": []}}
         for t in analytics_model.get("fact_tables", []) + analytics_model.get("dimension_tables", []):
             model_data["model"]["tables"].append({
@@ -625,7 +664,6 @@ def validate_report_layout_from_files() -> List[Dict[str, str]]:
                 "measures": []
             })
             
-        # Add measures from dax_artifacts.json or report_definition.json
         dax_path = OUTPUT_DIR / "dax_artifacts.json"
         measures_list = []
         if dax_path.exists():
@@ -635,7 +673,6 @@ def validate_report_layout_from_files() -> List[Dict[str, str]]:
         else:
             measures_list = [{"name": m["name"]} for m in report_def.get("measures", [])]
         
-        # Add measures table
         model_data["model"]["tables"].append({
             "name": "_Measures",
             "columns": [],
@@ -646,12 +683,10 @@ def validate_report_layout_from_files() -> List[Dict[str, str]]:
             model_data = json.load(f)
 
     if not report_json_path.exists():
-        # Mock report_data from report_def for validation before compilation
         report_data = {"sections": []}
         for p in report_def.get("pages", []):
             vc = []
             for v in p.get("visuals", []):
-                # mock visual config
                 vc.append({
                     "config": json.dumps({
                         "name": v.get("title", ""),
@@ -672,4 +707,3 @@ def validate_report_layout_from_files() -> List[Dict[str, str]]:
             report_data = json.load(f)
 
     return validate_report_layout(report_data, model_data, report_def)
-

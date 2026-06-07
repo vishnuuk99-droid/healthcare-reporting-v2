@@ -1,5 +1,9 @@
 {
   "report_name": "CMS Organization Determinations, Appeals, and Grievances Report",
+  "canvas_size": {
+    "width": 1280,
+    "height": 720
+  },
   "pages": [
     {
       "page_name": "Executive Summary",
@@ -12,7 +16,12 @@
           "measures": [
             "Total Org Determinations Override"
           ],
-          "business_reason": "Total Organization Determinations"
+          "position": {
+            "x": 20,
+            "y": 20,
+            "width": 280,
+            "height": 150
+          }
         },
         {
           "title": "Adverse Decision Rate",
@@ -21,7 +30,12 @@
           "measures": [
             "Adverse Decision Rate"
           ],
-          "business_reason": "Adverse Decision Rate"
+          "position": {
+            "x": 320,
+            "y": 20,
+            "width": 280,
+            "height": 150
+          }
         },
         {
           "title": "Average Turnaround Time",
@@ -30,7 +44,12 @@
           "measures": [
             "Average Turnaround Time"
           ],
-          "business_reason": "Average Turnaround Time"
+          "position": {
+            "x": 620,
+            "y": 20,
+            "width": 280,
+            "height": 150
+          }
         },
         {
           "title": "Clean Claim Rate",
@@ -39,7 +58,12 @@
           "measures": [
             "Clean Claim Rate"
           ],
-          "business_reason": "Clean Claim Rate"
+          "position": {
+            "x": 920,
+            "y": 20,
+            "width": 280,
+            "height": 150
+          }
         },
         {
           "title": "Monthly Determination Volume Trend",
@@ -50,7 +74,12 @@
           "measures": [
             "Total Org Determinations Override"
           ],
-          "business_reason": "Monthly Determination Volume Trend"
+          "position": {
+            "x": 20,
+            "y": 190,
+            "width": 560,
+            "height": 320
+          }
         },
         {
           "title": "Outcome Distribution",
@@ -61,7 +90,12 @@
           "measures": [
             "Total Org Determinations Override"
           ],
-          "business_reason": "Outcome Distribution"
+          "position": {
+            "x": 600,
+            "y": 190,
+            "width": 560,
+            "height": 320
+          }
         }
       ]
     },
@@ -78,7 +112,12 @@
           "measures": [
             "Total Org Determinations Override"
           ],
-          "business_reason": "Determinations by Provider"
+          "position": {
+            "x": 20,
+            "y": 20,
+            "width": 560,
+            "height": 320
+          }
         },
         {
           "title": "Determinations by Organization",
@@ -89,7 +128,12 @@
           "measures": [
             "Total Org Determinations Override"
           ],
-          "business_reason": "Determinations by Organization"
+          "position": {
+            "x": 600,
+            "y": 20,
+            "width": 560,
+            "height": 320
+          }
         },
         {
           "title": "Decisions by Disposition",
@@ -100,7 +144,12 @@
           "measures": [
             "Total Org Determinations Override"
           ],
-          "business_reason": "Decisions by Disposition"
+          "position": {
+            "x": 20,
+            "y": 360,
+            "width": 560,
+            "height": 320
+          }
         },
         {
           "title": "Trend Analysis",
@@ -111,7 +160,12 @@
           "measures": [
             "Total Org Determinations Override"
           ],
-          "business_reason": "Trend Analysis"
+          "position": {
+            "x": 600,
+            "y": 360,
+            "width": 560,
+            "height": 320
+          }
         }
       ]
     },
@@ -126,7 +180,12 @@
           "measures": [
             "Missing Data %"
           ],
-          "business_reason": "Missing Data %"
+          "position": {
+            "x": 20,
+            "y": 20,
+            "width": 280,
+            "height": 150
+          }
         },
         {
           "title": "Validation Errors",
@@ -135,7 +194,12 @@
           "measures": [
             "Validation Errors"
           ],
-          "business_reason": "Validation Errors"
+          "position": {
+            "x": 320,
+            "y": 20,
+            "width": 280,
+            "height": 150
+          }
         },
         {
           "title": "Data Quality Score",
@@ -144,7 +208,12 @@
           "measures": [
             "Data Quality Score"
           ],
-          "business_reason": "Data Quality Score"
+          "position": {
+            "x": 620,
+            "y": 20,
+            "width": 280,
+            "height": 150
+          }
         },
         {
           "title": "Quality Trend",
@@ -155,7 +224,12 @@
           "measures": [
             "Quality Trend"
           ],
-          "business_reason": "Quality Trend"
+          "position": {
+            "x": 20,
+            "y": 190,
+            "width": 560,
+            "height": 320
+          }
         }
       ]
     },
@@ -173,7 +247,12 @@
           "measures": [
             "Total Org Determinations Override"
           ],
-          "business_reason": "CMS Submission Matrix"
+          "position": {
+            "x": 20,
+            "y": 20,
+            "width": 1200,
+            "height": 300
+          }
         },
         {
           "title": "CMS Submission Detail Table",
@@ -188,62 +267,14 @@
           "measures": [
             "Total Org Determinations Override"
           ],
-          "business_reason": "CMS Submission Detail Table"
+          "position": {
+            "x": 20,
+            "y": 340,
+            "width": 1200,
+            "height": 340
+          }
         }
       ]
-    }
-  ],
-  "filters": [
-    {
-      "name": "Reporting Year",
-      "field": "DimDate.year",
-      "filter_type": "dropdown",
-      "default_value": "2026",
-      "scope": "report"
-    }
-  ],
-  "measures": [
-    {
-      "name": "Average Turnaround Time",
-      "dax_expression": "DIVIDE(SUM(FactDetermination[determination_key]), 2, 0)",
-      "format_string": "#,##0",
-      "description": "Average turnaround time for organization determinations in days.",
-      "home_table": "FactDetermination"
-    },
-    {
-      "name": "Clean Claim Rate",
-      "dax_expression": "DIVIDE(CALCULATE(COUNTROWS(FactDetermination), FactDetermination[is_clean_claim] = TRUE), COUNTROWS(FactDetermination), 0)",
-      "format_string": "0.0%",
-      "description": "Percentage of clean claims submitted.",
-      "home_table": "FactDetermination"
-    },
-    {
-      "name": "Missing Data %",
-      "dax_expression": "DIVIDE(CALCULATE(COUNTROWS(FactDetermination), ISBLANK(FactDetermination[od_number])), COUNTROWS(FactDetermination), 0)",
-      "format_string": "0.0%",
-      "description": "Percentage of records missing key identifying fields.",
-      "home_table": "FactDetermination"
-    },
-    {
-      "name": "Validation Errors",
-      "dax_expression": "CALCULATE(COUNTROWS(FactDetermination), FactDetermination[were_internal_plan_criteria_applied] = FALSE)",
-      "format_string": "#,##0",
-      "description": "Total count of validation warnings or errors in data.",
-      "home_table": "FactDetermination"
-    },
-    {
-      "name": "Data Quality Score",
-      "dax_expression": "0.98 - DIVIDE([Validation Errors], COUNTROWS(FactDetermination), 0)",
-      "format_string": "0.0%",
-      "description": "Composite score representing data completeness and validation rate.",
-      "home_table": "FactDetermination"
-    },
-    {
-      "name": "Quality Trend",
-      "dax_expression": "[Data Quality Score]",
-      "format_string": "0.0%",
-      "description": "Historical data quality score trend.",
-      "home_table": "FactDetermination"
     }
   ]
 }
