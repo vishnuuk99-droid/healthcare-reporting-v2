@@ -49,6 +49,9 @@ _DAX_ARTIFACTS_FILE = OUTPUT_DIR / "dax_artifacts.json"
 
 _PBIP_DIR = OUTPUT_DIR / "pbip"
 _ZIP_FILE = OUTPUT_DIR / "pbip_project.zip"
+_REPORT_LAYOUT_FILE = OUTPUT_DIR / "report_layout.json"
+_REPORT_VISUALS_FILE = OUTPUT_DIR / "report_visuals.json"
+
 
 class PBIPValidationError(Exception):
     """Exception raised when PBIP validation fails."""
@@ -87,7 +90,8 @@ def _slugify(name: str) -> str:
     """Convert a page/visual name to a safe folder name."""
     slug = re.sub(r"[^\w\s-]", "", name).strip()
     slug = re.sub(r"[\s]+", "_", slug)
-    return slug or "unnamed"
+    # Truncate to 25 characters to prevent Windows MAX_PATH (WinError 206) issues
+    return (slug or "unnamed")[:25].rstrip("_")
 
 
 def _get_clean_id(name: str) -> str:
@@ -904,8 +908,6 @@ def compile_pbip_project() -> dict:
     # Try to load intelligence engine outputs
     report_layout_data = None
     report_visuals_data = None
-    _REPORT_LAYOUT_FILE = OUTPUT_DIR / "report_layout.json"
-    _REPORT_VISUALS_FILE = OUTPUT_DIR / "report_visuals.json"
     if _REPORT_LAYOUT_FILE.exists() and _REPORT_VISUALS_FILE.exists():
         try:
             with open(_REPORT_LAYOUT_FILE, "r", encoding="utf-8") as f:
@@ -1239,9 +1241,6 @@ def compile_pbip_project() -> dict:
 
     # ── Run Validations ──────────────────────────────────────────────
     validation_result = validate_pbip_project()
-    
-    if validation_result.get("errors"):
-        raise PBIPValidationError(validation_result["errors"])
 
     return {
         "is_valid": validation_result["is_valid"],
@@ -1250,6 +1249,9 @@ def compile_pbip_project() -> dict:
         "zip_size_bytes": _ZIP_FILE.stat().st_size if _ZIP_FILE.exists() else 0,
         "validation_logs": validation_result["logs"],
         "validation_details": validation_result["details"],
+        "errors": validation_result.get("errors", []),
+        "warnings": validation_result.get("warnings", []),
+        "recommended_fixes": validation_result.get("recommended_fixes", []),
     }
 
 

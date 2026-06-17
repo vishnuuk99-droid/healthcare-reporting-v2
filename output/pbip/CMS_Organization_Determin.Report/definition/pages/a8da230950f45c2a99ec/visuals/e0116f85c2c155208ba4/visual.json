@@ -1,16 +1,16 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
-  "name": "f4a918c489d95d04a0c9",
+  "name": "e0116f85c2c155208ba4",
   "position": {
     "x": 600,
-    "y": 530,
+    "y": 190,
     "z": 0,
     "width": 560,
     "height": 320,
     "tabOrder": 0
   },
   "visual": {
-    "visualType": "lineChart",
+    "visualType": "donutChart",
     "drillFilterOtherVisuals": true,
     "query": {
       "queryState": {
@@ -21,14 +21,14 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "DimDate"
+                      "Entity": "DimOrganization"
                     }
                   },
-                  "Property": "month_name"
+                  "Property": "organization_type"
                 }
               },
-              "queryRef": "DimDate.month_name",
-              "nativeQueryRef": "month_name",
+              "queryRef": "DimOrganization.organization_type",
+              "nativeQueryRef": "organization_type",
               "active": true
             }
           ]
@@ -60,10 +60,10 @@
               "Column": {
                 "Expression": {
                   "SourceRef": {
-                    "Entity": "DimDate"
+                    "Entity": "DimOrganization"
                   }
                 },
-                "Property": "month_name"
+                "Property": "organization_type"
               }
             },
             "direction": "Ascending"
@@ -80,6 +80,40 @@
               "expr": {
                 "Literal": {
                   "Value": "true"
+                }
+              }
+            },
+            "position": {
+              "expr": {
+                "Literal": {
+                  "Value": "'outside'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "legend": [
+        {
+          "properties": {
+            "position": {
+              "expr": {
+                "Literal": {
+                  "Value": "'TopCenter'"
+                }
+              }
+            },
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
                 }
               }
             }
@@ -119,7 +153,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Trend Analysis'"
+                  "Value": "'Determinations by Organization'"
                 }
               }
             },

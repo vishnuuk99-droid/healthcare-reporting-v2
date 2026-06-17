@@ -373,9 +373,11 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
     # ── 1. Map columns and measures ───────────────────────────────────
     model_columns_map = {}
     valid_tables = set()
+    tables_dict = {}
     for t in analytics_model.get("fact_tables", []) + analytics_model.get("dimension_tables", []):
         t_name = t.get("name", "")
         valid_tables.add(t_name)
+        tables_dict[t_name] = {c.get("name", "") for c in t.get("columns", [])}
         for col in t.get("columns", []):
             c_name = col.get("name", "")
             if c_name not in model_columns_map:
@@ -384,17 +386,153 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
 
     # Gather available measures in the compiled artifacts
     available_measures = set()
+    dax_list = []
     if dax_path.exists():
-        with open(dax_path, "r", encoding="utf-8") as f:
-            dax_list = json.load(f)
-            available_measures.update(m.get("measure_name", "") for m in dax_list)
-    else:
+        try:
+            with open(dax_path, "r", encoding="utf-8") as f:
+                dax_list = json.load(f)
+        except Exception:
+            dax_list = []
+    
+    measures_list = []
+    if measures_path.exists():
+        try:
+            with open(measures_path, "r", encoding="utf-8") as f:
+                measures_list = json.load(f)
+        except Exception:
+            measures_list = []
+
+    available_measures.update(m.get("measure_name", "") for m in dax_list)
+    if not available_measures:
         available_measures.update(m.get("name", "") for m in report_def.get("measures", []))
 
     applied_fixes = []
     table_replacements = {} # old_table -> new_table
 
+    # ── 1.5. Inject and Remap Missing Measures ──────────────────────────
+    MEASURE_TEMPLATES = {
+        "Total Determinations": {
+            "dax": "SUM(FactDeterminationAppeal[determination_count])",
+            "desc": "Total count of organization determinations."
+        },
+        "Total Appeals": {
+            "dax": "SUM(FactDeterminationAppeal[appeal_count])",
+            "desc": "Total count of appeals."
+        },
+        "Total Appeals Volume": {
+            "dax": "SUM(FactDeterminationAppeal[appeal_count])",
+            "desc": "Total volume of appeals."
+        },
+        "Appeal Favorable Rate": {
+            "dax": "DIVIDE(CALCULATE(SUM(FactDeterminationAppeal[appeal_count]), FactDeterminationAppeal[disposition] = \"Fully favorable\" || FactDeterminationAppeal[disposition] = \"Partially favorable\"), SUM(FactDeterminationAppeal[appeal_count]), 0)",
+            "desc": "Percentage of appeals with favorable outcomes."
+        },
+        "Total Third-Party Vendor Participations": {
+            "dax": "CALCULATE(COUNTROWS(FactDeterminationAppeal), FactDeterminationAppeal[third_party_vendor_participation_status] = \"Y\")",
+            "desc": "Total count of reviews where a third-party vendor participated."
+        },
+        "Expedited Processing Requested Count": {
+            "dax": "CALCULATE(COUNTROWS(FactDeterminationAppeal), FactDeterminationAppeal[expedited_processing_requested_status] = \"Y\")",
+            "desc": "Total count of expedited processing requests."
+        },
+        "Total Appeals of OD Dismissal": {
+            "dax": "CALCULATE(SUM(FactDeterminationAppeal[appeal_count]), FactDeterminationAppeal[appeal_of_od_dismissal_status] = \"Y\")",
+            "desc": "Total appeals of organization determination dismissal."
+        },
+        "Total Appeals - OD Denied Medical Necessity": {
+            "dax": "CALCULATE(SUM(FactDeterminationAppeal[appeal_count]), FactDeterminationAppeal[od_denied_medical_necessity_status] = \"Y\")",
+            "desc": "Total appeals where initial organization determination was denied for medical necessity."
+        },
+        "Total Reconsiderations Reviewed by Physician": {
+            "dax": "CALCULATE(SUM(FactDeterminationAppeal[appeal_count]), FactDeterminationAppeal[reconsideration_reviewed_by_physician_status] = \"Y\")",
+            "desc": "Total reconsiderations reviewed by a physician."
+        },
+        "Reconsideration Physician Review Rate": {
+            "dax": "DIVIDE(CALCULATE(SUM(FactDeterminationAppeal[appeal_count]), FactDeterminationAppeal[reconsideration_reviewed_by_physician_status] = \"Y\"), SUM(FactDeterminationAppeal[appeal_count]), 0)",
+            "desc": "Percentage of reconsiderations reviewed by a physician."
+        },
+        "Internal Plan Coverage Criteria Applied": {
+            "dax": "CALCULATE(SUM(FactDeterminationAppeal[determination_count]), FactDeterminationAppeal[internal_plan_coverage_criteria_applied_status] = \"Y\")",
+            "desc": "Total determinations where internal plan coverage criteria were applied."
+        },
+        "Approved Item Different from Requested": {
+            "dax": "CALCULATE(SUM(FactDeterminationAppeal[determination_count]), FactDeterminationAppeal[approved_item_different_from_requested_status] = \"Y\")",
+            "desc": "Total determinations where approved item was different from requested."
+        },
+        "Favorable Determination Rate": {
+            "dax": "DIVIDE(CALCULATE(SUM(FactDeterminationAppeal[determination_count]), FactDeterminationAppeal[disposition] = \"Fully favorable\" || FactDeterminationAppeal[disposition] = \"Partially favorable\"), SUM(FactDeterminationAppeal[determination_count]), 0)",
+            "desc": "Percentage of determinations with favorable outcomes."
+        },
+        "Adverse Determination Rate": {
+            "dax": "DIVIDE(CALCULATE(SUM(FactDeterminationAppeal[determination_count]), FactDeterminationAppeal[disposition] = \"Adverse\"), SUM(FactDeterminationAppeal[determination_count]), 0)",
+            "desc": "Percentage of determinations with adverse outcomes."
+        }
+    }
+
+    # Pre-clean direct DAX formulas in visuals and inject missing conformed measures
+    for p in report_def.get("pages", []):
+        for v in p.get("visuals", []):
+            title = v.get("title", "")
+            cleaned_measures = []
+            for m_field in v.get("measures", []):
+                m_clean = m_field
+                # Clean raw DAX formula strings
+                if "CALCULATE" in m_field or "[" in m_field:
+                    m_clean = title
+                    applied_fixes.append({
+                        "visual": title,
+                        "issue": f"Visual references a raw DAX expression: '{m_field}'.",
+                        "fix_applied": f"Remapped measure reference to clean name '{m_clean}' and generated the corresponding DAX measure."
+                    })
+                
+                if m_clean not in available_measures:
+                    # Resolve to templates or conformed fallback
+                    tpl = MEASURE_TEMPLATES.get(m_clean, {
+                        "dax": "COUNTROWS(FactDeterminationAppeal)",
+                        "desc": f"Total count for {m_clean}."
+                    })
+                    
+                    # Add to dax_list
+                    dax_list.append({
+                        "measure_name": m_clean,
+                        "business_definition": tpl["desc"],
+                        "dax_expression": tpl["dax"],
+                        "dependencies": []
+                    })
+                    
+                    # Add to measures_list
+                    measures_list.append({
+                        "measure_name": m_clean,
+                        "measure_type": "Percentage" if "Rate" in m_clean or "%" in m_clean else "Count",
+                        "classification": "Derived Measure" if "Rate" in m_clean or "%" in m_clean else "Base Measure",
+                        "business_definition": tpl["desc"],
+                        "formula_description": tpl["dax"],
+                        "source_tables": ["FactDeterminationAppeal"],
+                        "source_fields": [],
+                        "dependencies": [],
+                        "report_pages": [p["page_name"]],
+                        "visuals_used_in": [title]
+                    })
+                    
+                    available_measures.add(m_clean)
+                    applied_fixes.append({
+                        "visual": title,
+                        "issue": f"Measure '{m_clean}' is missing from the compiled semantic model.",
+                        "fix_applied": f"Generated conformed DAX measure '{m_clean}'."
+                    })
+                cleaned_measures.append(m_clean)
+            v["measures"] = cleaned_measures
+
+    # Write back measures and DAX updates
+    if dax_list:
+        with open(dax_path, "w", encoding="utf-8") as f:
+            json.dump(dax_list, f, indent=2)
+    if measures_list:
+        with open(measures_path, "w", encoding="utf-8") as f:
+            json.dump(measures_list, f, indent=2)
+
     # ── 2. Fix visuals field bindings ──────────────────────────────────
+
     pages = report_def.get("pages", [])
     for p in pages:
         for v in p.get("visuals", []):
@@ -440,21 +578,74 @@ def auto_correct_report_layout() -> Tuple[List[Dict[str, str]], Dict[str, Any]]:
                             else:
                                 corrected_dims.append(d_field)
                     else:
-                        corrected_dims.append(d_field)
+                        # Table exists, but check if column is missing in that table
+                        if col not in tables_dict[tbl]:
+                            # Try manual mapping first
+                            manual_mapped_col = None
+                            MANUAL_REMAPPING = {
+                                "month_name": "month",
+                                "disposition": "observation_status",
+                                "provider_name": "npi",
+                                "organization_name": "organization_type",
+                                "od_number": "observation_identifier"
+                            }
+                            if col in MANUAL_REMAPPING and MANUAL_REMAPPING[col] in tables_dict[tbl]:
+                                manual_mapped_col = MANUAL_REMAPPING[col]
+                            
+                            if manual_mapped_col:
+                                corrected_dims.append(f"{tbl}[{manual_mapped_col}]" if is_bracket else f"{tbl}.{manual_mapped_col}")
+                                applied_fixes.append({
+                                    "visual": title,
+                                    "issue": f"Column '{col}' is missing in table '{tbl}'.",
+                                    "fix_applied": f"Remapped column '{col}' to '{manual_mapped_col}' (via manual override)."
+                                })
+                            else:
+                                # Try close match in this table
+                                similar_cols = difflib.get_close_matches(col, list(tables_dict[tbl]), n=1, cutoff=0.5)
+                                if similar_cols:
+                                    new_col = similar_cols[0]
+                                    corrected_dims.append(f"{tbl}[{new_col}]" if is_bracket else f"{tbl}.{new_col}")
+                                    applied_fixes.append({
+                                        "visual": title,
+                                        "issue": f"Column '{col}' is missing in table '{tbl}'.",
+                                        "fix_applied": f"Remapped column '{col}' to '{new_col}' (closest match in table)."
+                                    })
+                                else:
+                                    corrected_dims.append(d_field)
+                        else:
+                            corrected_dims.append(d_field)
                 else:
                     if d_field not in model_columns_map:
-                        similar_cols = difflib.get_close_matches(d_field, list(model_columns_map.keys()), n=1, cutoff=0.6)
-                        if similar_cols:
-                            new_col = similar_cols[0]
+                        # Try manual mapping first
+                        MANUAL_REMAPPING = {
+                            "month_name": "month",
+                            "disposition": "observation_status",
+                            "provider_name": "npi",
+                            "organization_name": "organization_type",
+                            "od_number": "observation_identifier"
+                        }
+                        if d_field in MANUAL_REMAPPING and MANUAL_REMAPPING[d_field] in model_columns_map:
+                            new_col = MANUAL_REMAPPING[d_field]
                             new_tbl = model_columns_map[new_col][0]
                             corrected_dims.append(f"{new_tbl}[{new_col}]" if is_bracket else f"{new_tbl}.{new_col}")
                             applied_fixes.append({
                                 "visual": title,
                                 "issue": f"Field '{d_field}' is missing from the model.",
-                                "fix_applied": f"Remapped to '{new_tbl}.{new_col}' (closest matching column)."
+                                "fix_applied": f"Remapped to '{new_tbl}.{new_col}' (via manual override)."
                             })
                         else:
-                            corrected_dims.append(d_field)
+                            similar_cols = difflib.get_close_matches(d_field, list(model_columns_map.keys()), n=1, cutoff=0.6)
+                            if similar_cols:
+                                new_col = similar_cols[0]
+                                new_tbl = model_columns_map[new_col][0]
+                                corrected_dims.append(f"{new_tbl}[{new_col}]" if is_bracket else f"{new_tbl}.{new_col}")
+                                applied_fixes.append({
+                                    "visual": title,
+                                    "issue": f"Field '{d_field}' is missing from the model.",
+                                    "fix_applied": f"Remapped to '{new_tbl}.{new_col}' (closest matching column)."
+                                })
+                            else:
+                                corrected_dims.append(d_field)
                     else:
                         new_tbl = model_columns_map[d_field][0]
                         corrected_dims.append(f"{new_tbl}[{d_field}]" if is_bracket else f"{new_tbl}.{d_field}")
@@ -666,7 +857,6 @@ def validate_report_layout_from_files() -> List[Dict[str, str]]:
     Helper to run layout validation directly using files on disk.
     """
     from modules.pbip_generator import get_project_slug
-    from modules.file_manager import OUTPUT_DIR
     import json
 
     project_slug = get_project_slug()

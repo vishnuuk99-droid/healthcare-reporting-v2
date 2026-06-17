@@ -1,6 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
-  "name": "141d207978e9525bbab5",
+  "name": "7ab2121e13355a1db936",
   "position": {
     "x": 20,
     "y": 190,
@@ -10,7 +10,7 @@
     "tabOrder": 0
   },
   "visual": {
-    "visualType": "barChart",
+    "visualType": "lineChart",
     "drillFilterOtherVisuals": true,
     "query": {
       "queryState": {
@@ -21,14 +21,14 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "DimProvider"
+                      "Entity": "DimDate"
                     }
                   },
-                  "Property": "provider_name"
+                  "Property": "month"
                 }
               },
-              "queryRef": "DimProvider.provider_name",
-              "nativeQueryRef": "provider_name",
+              "queryRef": "DimDate.month",
+              "nativeQueryRef": "month",
               "active": true
             }
           ]
@@ -43,11 +43,11 @@
                       "Entity": "_Measures"
                     }
                   },
-                  "Property": "Total Org Determinations Override"
+                  "Property": "Quality Trend"
                 }
               },
-              "queryRef": "_Measures.Total Org Determinations Override",
-              "nativeQueryRef": "Total Org Determinations Override",
+              "queryRef": "_Measures.Quality Trend",
+              "nativeQueryRef": "Quality Trend",
               "active": true
             }
           ]
@@ -60,10 +60,10 @@
               "Column": {
                 "Expression": {
                   "SourceRef": {
-                    "Entity": "DimProvider"
+                    "Entity": "DimDate"
                   }
                 },
-                "Property": "provider_name"
+                "Property": "month"
               }
             },
             "direction": "Ascending"
@@ -119,7 +119,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Determinations by Provider'"
+                  "Value": "'Quality Trend'"
                 }
               }
             },

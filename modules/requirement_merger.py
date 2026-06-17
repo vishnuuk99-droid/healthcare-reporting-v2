@@ -106,7 +106,7 @@ def merge_requirements(
     client = _get_client()
 
     response = client.models.generate_content(
-        model="gemini-3.5-flash",
+        model="gemini-2.0-flash",
         contents=prompt,
         config=types.GenerateContentConfig(
             system_instruction=_MERGE_SYSTEM_INSTRUCTION,

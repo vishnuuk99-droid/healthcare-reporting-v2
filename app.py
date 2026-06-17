@@ -14,6 +14,53 @@ load_dotenv()
 
 import streamlit as st
 
+# ── Monkey Patching Gemini SDK for Automatic Failover ────────────────
+try:
+    import google.genai.models
+    import time
+    
+    _original_generate_content = google.genai.models.Models.generate_content
+
+    def patched_generate_content(self, *, model: str, contents, config=None):
+        # Failover models list
+        models_to_try = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest", "gemini-2.5-pro"]
+        
+        # Ensure the requested model is tried first
+        if model in models_to_try:
+            models_to_try.remove(model)
+            models_to_try.insert(0, model)
+        else:
+            models_to_try.insert(0, model)
+
+        last_error = None
+        for m in models_to_try:
+            # Update streamlit status label if running under a status container
+            if "active_status_container" in st.session_state:
+                status = st.session_state["active_status_container"]
+                label = st.session_state.get("active_status_label", "Running")
+                status.update(label=f"⏳ {label} with **{m}**...")
+            
+            try:
+                return _original_generate_content(self, model=m, contents=contents, config=config)
+            except Exception as e:
+                last_error = e
+                err_str = str(e).lower()
+                is_quota_or_spike = any(
+                    kw in err_str
+                    for kw in ["quota", "exhausted", "503", "unavailable", "429", "resource_exhausted", "limit"]
+                )
+                if is_quota_or_spike:
+                    st.warning(f"⚠️ **{m}** failed (quota/overload). Failing over to next model...")
+                    time.sleep(1)
+                    continue
+                raise e
+        
+        raise Exception(f"All Gemini models failed. Last error: {last_error}")
+
+    google.genai.models.Models.generate_content = patched_generate_content
+except Exception as patch_err:
+    st.error(f"Error applying Gemini failover patch: {patch_err}")
+
 
 from modules.file_manager import (
     ensure_directories,
@@ -142,6 +189,9 @@ def _init_active_session():
     pg._DAX_ARTIFACTS_FILE = active_output_dir / "dax_artifacts.json"
     pg._PBIP_DIR = active_output_dir / "pbip"
     pg._ZIP_FILE = active_output_dir / "pbip_project.zip"
+    pg._REPORT_LAYOUT_FILE = active_output_dir / "report_layout.json"
+    pg._REPORT_VISUALS_FILE = active_output_dir / "report_visuals.json"
+
 
     rie._REQUIREMENTS_FILE = req_path
     rie._REPORT_DEFINITION_FILE = active_output_dir / "report_definition.json"
@@ -936,10 +986,13 @@ if page == "📄 Upload & Extract":
                 saved_cms_path = save_uploaded_file(uploaded_file, active_know)
 
                 # 4. Extract CMS Requirements
-                with st.spinner("Extracting CMS requirements with Gemini..."):
+                with st.status("Extracting CMS requirements") as status:
+                    st.session_state["active_status_container"] = status
+                    st.session_state["active_status_label"] = "Extracting CMS requirements"
                     cms_reqs = extract_requirements(extracted_text)
                     save_requirements(cms_reqs, active_out / "requirements.json")
                     st.session_state["requirements_json"] = cms_reqs.model_dump()
+                    status.update(label="✅ Extracting CMS requirements completed!", state="complete")
                     
                     ps = _get_pipeline_state()
                     ps.mark_completed("requirement_extraction", str(active_out / "requirements.json"))
@@ -954,7 +1007,9 @@ if page == "📄 Upload & Extract":
                 frs_reqs_dict = None
                 inputs_used_for_merge = [str(active_out / "requirements.json")]
                 if frs_text:
-                    with st.spinner("Extracting FRS requirements with Gemini..."):
+                    with st.status("Extracting FRS requirements") as status:
+                        st.session_state["active_status_container"] = status
+                        st.session_state["active_status_label"] = "Extracting FRS requirements"
                         # Save FRS document
                         saved_frs_path = save_uploaded_file(frs_file, active_know)
                         inputs_used_for_merge.append(saved_frs_path)
@@ -964,6 +1019,7 @@ if page == "📄 Upload & Extract":
                         frs_reqs_dict = frs_reqs.model_dump()
                         st.session_state["frs_requirements"] = frs_reqs_dict
                         st.session_state["frs_text"] = frs_text
+                        status.update(label="✅ Extracting FRS requirements completed!", state="complete")
                         
                         ps.mark_completed("frs_processing", str(active_out / "frs_requirements.json"))
                         log_artifact_generation(
@@ -974,10 +1030,13 @@ if page == "📄 Upload & Extract":
                         )
 
                 # 6. Run merge engine
-                with st.spinner("Merging requirements..."):
+                with st.status("Merging requirements") as status:
+                    st.session_state["active_status_container"] = status
+                    st.session_state["active_status_label"] = "Merging requirements"
                     merged = merge_requirements(cms_reqs.model_dump(), frs_reqs_dict)
                     save_merged_requirements(merged, active_out / "merged_requirements.json")
                     st.session_state["merged_requirements"] = merged.model_dump()
+                    status.update(label="✅ Merging requirements completed!", state="complete")
                     
                     ps.mark_completed("requirement_merge", str(active_out / "merged_requirements.json"))
                     log_artifact_generation(
@@ -1359,8 +1418,11 @@ elif page == "🔗 FHIR Mapping":
 
     if st.button("🧬 Generate FHIR Mappings", type="primary", use_container_width=True):
         try:
-            with st.spinner("Mapping CMS concepts to FHIR resources with Gemini…"):
+            with st.status("Mapping CMS concepts to FHIR resources") as status:
+                st.session_state["active_status_container"] = status
+                st.session_state["active_status_label"] = "Mapping CMS concepts to FHIR resources"
                 mappings = generate_mappings(requirements_json, decisions)
+                status.update(label="✅ Mapping CMS concepts to FHIR resources completed!", state="complete")
 
             st.session_state["fhir_mappings"] = [m.model_dump() for m in mappings]
             st.success(f"✅ Generated {len(mappings)} mappings")
@@ -1626,8 +1688,11 @@ elif page == "📊 Analytics Model":
 
     if st.button(gen_label, type="primary", use_container_width=True):
         try:
-            with st.spinner("Building star schema with Gemini — identifying metrics, dimensions, and drill-down attributes…"):
+            with st.status("Building star schema with Gemini") as status:
+                st.session_state["active_status_container"] = status
+                st.session_state["active_status_label"] = "Building star schema with Gemini"
                 model = generate_analytics_model(requirements_json, decisions)
+                status.update(label="✅ Building star schema with Gemini completed!", state="complete")
 
             st.session_state["analytics_model"] = model.model_dump()
             st.session_state["analytics_model_approved"] = False
@@ -3984,9 +4049,6 @@ elif page == "📦 PBIP Generator":
     st.markdown('<p class="main-title">PBIP Generator</p>', unsafe_allow_html=True)
     st.caption("Generate a complete Power BI Project (PBIP) archive from approved upstream artifacts.")
 
-    import importlib
-    import modules.pbip_generator
-    importlib.reload(modules.pbip_generator)
     from modules.pbip_generator import compile_pbip_project, validate_pbip_project
 
     # Check inputs
@@ -4027,7 +4089,10 @@ elif page == "📦 PBIP Generator":
                 try:
                     res = compile_pbip_project()
                     st.session_state["pbip_results"] = res
-                    st.success("✅ PBIP project compiled successfully!")
+                    if res.get("is_valid"):
+                        st.success("✅ PBIP project compiled successfully!")
+                    else:
+                        st.warning("⚠️ PBIP project compiled with validation issues.")
                     st.rerun()
                 except Exception as e:
                     st.error(f"❌ Compilation failed: {e}")
@@ -4076,23 +4141,46 @@ elif page == "📦 PBIP Generator":
 
             st.markdown("### 📋 Generated Files Detail")
             files_table = []
-            for fname, info in results["files"].items():
-                files_table.append({
-                    "File": fname,
-                    "Size": f"{info['size_bytes'] / 1024:.2f} KB"
-                })
-            import pandas as pd
-            st.dataframe(pd.DataFrame(files_table), use_container_width=True, hide_index=True)
+            files_data = results.get("files", {})
+            if files_data:
+                for fname, info in files_data.items():
+                    files_table.append({
+                        "File": fname,
+                        "Size": f"{info['size_bytes'] / 1024:.2f} KB"
+                    })
+                import pandas as pd
+                st.dataframe(pd.DataFrame(files_table), use_container_width=True, hide_index=True)
+            else:
+                st.info("No files data available – check validation results.")
 
         with col_right:
             st.markdown("### 🧪 Validation Results")
-            for log in results["validation_logs"]:
+            for log in results.get("validation_logs", []):
                 if log.startswith("MISSING:") or log.startswith("EMPTY:") or log.startswith("ERROR:") or log.startswith("ZIP MISSING:"):
                     st.error(log)
-                elif log.startswith("WARNING:"):
+                elif log.startswith("WARNING:") or log.startswith("LAYOUT"):
                     st.warning(log)
                 else:
                     st.success(log)
+
+            # Show validation errors summary
+            v_errors = results.get("errors", [])
+            v_warnings = results.get("warnings", [])
+            if v_errors:
+                with st.expander(f"⛔ {len(v_errors)} Validation Error(s)", expanded=False):
+                    for err in v_errors:
+                        st.error(err)
+            if v_warnings:
+                with st.expander(f"⚠️ {len(v_warnings)} Warning(s)", expanded=False):
+                    for warn in v_warnings:
+                        st.warning(warn)
+
+            # Show recommended fixes
+            fixes = results.get("recommended_fixes", [])
+            if fixes:
+                with st.expander("🔧 Recommended Fixes", expanded=False):
+                    for fix in fixes:
+                        st.markdown(f"- {fix}")
 
         # Download ZIP section
         st.markdown("---")
@@ -4125,9 +4213,6 @@ elif page == "✅ PBIP Validation":
     st.markdown('<p class="main-title">PBIP Validation</p>', unsafe_allow_html=True)
     st.caption("Validate the generated PBIP package against the official Power BI Desktop PBIP specification.")
 
-    import importlib
-    import modules.pbip_generator as _pbip_val_mod
-    importlib.reload(_pbip_val_mod)
     from modules.pbip_generator import validate_pbip_project as _validate_pbip, PBIP_REQUIRED_FILES as _PBIP_REQ
 
     pbip_dir_exists = (_get_active_output_dir() / "pbip").exists()

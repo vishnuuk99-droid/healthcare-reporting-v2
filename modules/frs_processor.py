@@ -82,7 +82,7 @@ def extract_frs_requirements(frs_text: str) -> FRSRequirements:
     client = _get_client()
 
     response = client.models.generate_content(
-        model="gemini-3.5-flash",
+        model="gemini-2.0-flash",
         contents=frs_text,
         config=types.GenerateContentConfig(
             system_instruction=_FRS_SYSTEM_INSTRUCTION,

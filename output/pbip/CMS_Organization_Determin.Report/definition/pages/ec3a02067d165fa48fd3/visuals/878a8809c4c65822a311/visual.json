@@ -1,8 +1,8 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
-  "name": "e0116f85c2c155208ba4",
+  "name": "878a8809c4c65822a311",
   "position": {
-    "x": 600,
+    "x": 20,
     "y": 190,
     "z": 0,
     "width": 560,
@@ -10,7 +10,7 @@
     "tabOrder": 0
   },
   "visual": {
-    "visualType": "barChart",
+    "visualType": "lineChart",
     "drillFilterOtherVisuals": true,
     "query": {
       "queryState": {
@@ -21,14 +21,14 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "DimOrganization"
+                      "Entity": "DimDate"
                     }
                   },
-                  "Property": "organization_name"
+                  "Property": "month"
                 }
               },
-              "queryRef": "DimOrganization.organization_name",
-              "nativeQueryRef": "organization_name",
+              "queryRef": "DimDate.month",
+              "nativeQueryRef": "month",
               "active": true
             }
           ]
@@ -60,10 +60,10 @@
               "Column": {
                 "Expression": {
                   "SourceRef": {
-                    "Entity": "DimOrganization"
+                    "Entity": "DimDate"
                   }
                 },
-                "Property": "organization_name"
+                "Property": "month"
               }
             },
             "direction": "Ascending"
@@ -119,7 +119,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Determinations by Organization'"
+                  "Value": "'Monthly Determination Volume Trend'"
                 }
               }
             },
