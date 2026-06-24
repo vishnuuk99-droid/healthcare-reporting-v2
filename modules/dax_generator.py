@@ -28,7 +28,11 @@ _DATA_DICTIONARY_FILE = OUTPUT_DIR / "data_dictionary.json"
 _DAX_OUTPUT_FILE = OUTPUT_DIR / "dax_artifacts.json"
 
 ALLOWED_DAX_FUNCTIONS = {
-    "COUNTROWS", "DISTINCTCOUNT", "SUM", "AVERAGE", "DIVIDE", "CALCULATE", "FILTER"
+    "COUNTROWS", "DISTINCTCOUNT", "SUM", "AVERAGE", "DIVIDE",
+    "CALCULATE", "FILTER", "DATEDIFF", "ISBLANK", "NOT",
+    "IF", "SWITCH", "ALL", "ALLEXCEPT", "VALUES",
+    "SAMEPERIODLASTYEAR", "DATEADD", "PREVIOUSQUARTER",
+    "TOTALYTD", "TOTALQTD", "KEEPFILTERS",
 }
 
 _SYSTEM_INSTRUCTION = """\
@@ -66,6 +70,44 @@ Order rules:
 - Generate and sort the base measures first (which reference tables/columns directly).
 - Follow with derived measures and KPIs (which build on top of base measures).
 - Verify that every dependency is listed in the `dependencies` list.
+
+If structured metric definitions are provided, use them to generate
+CORRECT DAX:
+
+- For Count metrics with exclusion rules:
+  CALCULATE(COUNTROWS(FactTable),
+    FactTable[column] <> "excluded_value",
+    FactTable[status] <> "withdrawn")
+
+- For Percentage/Ratio metrics with numerator and denominator:
+  DIVIDE([Numerator Measure], [Denominator Measure], 0)
+
+- For timeliness metrics (timeliness_days > 0):
+  CALCULATE(COUNTROWS(FactTable),
+    DATEDIFF(FactTable[request_date], FactTable[decision_date], DAY)
+    <= timeliness_days)
+
+- For reporting_period_type = "Quarterly" with period_anchor:
+  Use TOTALQTD or DATEADD for period comparisons.
+
+- For reporting_period_type = "Annual":
+  Use TOTALYTD or SAMEPERIODLASTYEAR.
+
+- For reporting_period_type = "PointInTime":
+  Use LASTDATE or MAX for point-in-time snapshots.
+
+- Set format_string: Count/Sum → "#,##0", Percentage/Ratio → "0.0%",
+  Average → "#,##0.0"
+- Set home_table to the primary source fact table.
+
+CRITICAL RULES:
+1. Do NOT generate placeholder DAX like KEEPFILTERS('literal text')
+2. Do NOT repeat the measure name as the DAX expression
+3. Every dax_expression MUST be valid, executable Power BI DAX
+4. Every expression MUST reference actual table and column names
+   from the analytics model
+5. COUNTROWS(FactTable) without business filters is prohibited
+   for CMS metrics that have inclusion or exclusion rules
 """
 
 
@@ -131,6 +173,22 @@ def generate_dax_measures() -> list[DAXEntry]:
         context_parts.append(
             f"=== DATA DICTIONARY ===\n"
             f"{json.dumps(data_dictionary, indent=2)}"
+        )
+
+    requirements = _load_json_file(OUTPUT_DIR / "requirements.json")
+    structured_metrics = requirements.get("structured_metrics", []) if requirements else []
+
+    if structured_metrics:
+        context_parts.append(
+            f"=== STRUCTURED METRIC DEFINITIONS ===\n"
+            f"Use these to generate CORRECT DAX expressions:\n"
+            f"- numerator: what to count/sum in the numerator\n"
+            f"- denominator: the denominator (for Ratio/Percentage types)\n"
+            f"- exclusion_rules: records to EXCLUDE via FILTER or CALCULATE\n"
+            f"- inclusion_rules: records to INCLUDE via FILTER or CALCULATE\n"
+            f"- timeliness_days: threshold for DATEDIFF comparisons\n"
+            f"- reporting_period_type + period_anchor: for date intelligence\n\n"
+            f"{json.dumps(structured_metrics, indent=2)}"
         )
 
     content = "\n\n".join(context_parts)

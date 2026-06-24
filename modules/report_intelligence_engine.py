@@ -186,69 +186,48 @@ def run_report_intelligence_engine() -> Dict[str, Any]:
         with open(_MEASURES_FILE, "r", encoding="utf-8") as f:
             measures_list = json.load(f)
 
-    # 2. Inject conformed DAX measures if they don't exist
-    required_measures = [
-        {
-            "measure_name": "Average Turnaround Time",
-            "business_definition": "Average turnaround time for organization determinations in days.",
-            "dax_expression": "DIVIDE(SUM(FactOrganizationDetermination[determination_key]), 2, 0)",
-            "measure_type": "Count",
-            "classification": "Base Measure",
-            "formula_description": "DIVIDE(SUM(determination_key), 2, 0)",
-            "source_tables": ["FactOrganizationDetermination"],
-            "source_fields": ["determination_key"]
-        },
-        {
-            "measure_name": "Clean Claim Rate",
-            "business_definition": "Percentage of clean claims submitted.",
-            "dax_expression": "DIVIDE(CALCULATE(COUNTROWS(FactOrganizationDetermination), FactOrganizationDetermination[is_clean_claim] = TRUE), COUNTROWS(FactOrganizationDetermination), 0)",
-            "measure_type": "Percentage",
-            "classification": "Derived Measure",
-            "formula_description": "DIVIDE(COUNT(is_clean_claim = TRUE), COUNT(od_number))",
-            "source_tables": ["FactOrganizationDetermination"],
-            "source_fields": ["is_clean_claim"]
-        },
-        {
-            "measure_name": "Missing Data %",
-            "business_definition": "Percentage of records missing key identifying fields.",
-            "dax_expression": "DIVIDE(CALCULATE(COUNTROWS(FactOrganizationDetermination), ISBLANK(FactOrganizationDetermination[od_number])), COUNTROWS(FactOrganizationDetermination), 0)",
-            "measure_type": "Percentage",
-            "classification": "Derived Measure",
-            "formula_description": "DIVIDE(COUNT(ISBLANK(od_number)), COUNT(od_number))",
-            "source_tables": ["FactOrganizationDetermination"],
-            "source_fields": ["od_number"]
-        },
-        {
-            "measure_name": "Validation Errors",
-            "business_definition": "Total count of validation warnings or errors in data.",
-            "dax_expression": "CALCULATE(COUNTROWS(FactOrganizationDetermination), FactOrganizationDetermination[were_internal_plan_criteria_applied] = FALSE)",
-            "measure_type": "Count",
-            "classification": "Derived Measure",
-            "formula_description": "COUNT(were_internal_plan_criteria_applied = FALSE)",
-            "source_tables": ["FactOrganizationDetermination"],
-            "source_fields": ["were_internal_plan_criteria_applied"]
-        },
-        {
-            "measure_name": "Data Quality Score",
-            "business_definition": "Composite score representing data completeness and validation rate.",
-            "dax_expression": "0.98 - DIVIDE([Validation Errors], COUNTROWS(FactOrganizationDetermination), 0)",
-            "measure_type": "Percentage",
-            "classification": "Derived Measure",
-            "formula_description": "0.98 - DIVIDE(ValidationErrors, COUNTROWS)",
-            "source_tables": ["FactOrganizationDetermination"],
-            "source_fields": ["were_internal_plan_criteria_applied"]
-        },
-        {
-            "measure_name": "Quality Trend",
-            "business_definition": "Historical data quality score trend.",
-            "dax_expression": "[Data Quality Score]",
-            "measure_type": "Percentage",
-            "classification": "Derived Measure",
-            "formula_description": "DataQualityScore",
-            "source_tables": ["FactOrganizationDetermination"],
-            "source_fields": []
-        }
-    ]
+    # 2. Inject conformed measures from structured metric definitions
+    structured_metrics = []
+    if _REQUIREMENTS_FILE.exists():
+        with open(_REQUIREMENTS_FILE, "r", encoding="utf-8") as f:
+            req_data = json.load(f)
+            structured_metrics = req_data.get("structured_metrics", [])
+
+    # Build required measures dynamically from structured definitions
+    required_measures = []
+    for sm in structured_metrics:
+        metric_name = sm.get("metric_name", "")
+        metric_type = sm.get("metric_type", "Count")
+        if not metric_name:
+            continue
+
+        # Determine format string
+        fmt = "#,##0"
+        if metric_type in ("Percentage", "Ratio"):
+            fmt = "0.0%"
+        elif metric_type == "Average":
+            fmt = "#,##0.0"
+
+        # Determine classification
+        classification = "Base Measure"
+        if metric_type in ("Percentage", "Ratio"):
+            classification = "Derived Measure"
+
+        required_measures.append({
+            "measure_name": metric_name.replace(":", " -").strip(),
+            "business_definition": sm.get("business_definition", metric_name),
+            "dax_expression": "",  # Will be filled by DAX generator
+            "measure_type": metric_type,
+            "classification": classification,
+            "formula_description": sm.get("numerator", metric_name),
+            "source_tables": [],
+            "source_fields": [],
+            "format_string": fmt,
+        })
+        
+    # Fallback if no structured metrics
+    if not required_measures:
+        required_measures = []
 
     modified_dax = False
     existing_dax_names = {m["measure_name"] for m in dax_list}
@@ -429,6 +408,23 @@ def run_report_intelligence_engine() -> Dict[str, Any]:
             }
         ]
 
+    # Load reporting intent for visual type enrichment
+    intent_map = {}
+    _INTENT_FILE_PATH = OUTPUT_DIR / "reporting_intent.json"
+    if _INTENT_FILE_PATH.exists():
+        with open(_INTENT_FILE_PATH, "r", encoding="utf-8") as f:
+            try:
+                intent_data = json.load(f)
+                intents = intent_data.get("intents", []) if isinstance(intent_data, dict) else intent_data
+                for item in intents:
+                    req = item.get("requirement", "")
+                    intent = item.get("intent", "")
+                    rec_visual = item.get("recommended_visual", "")
+                    if req:
+                        intent_map[req] = {"intent": intent, "visual": rec_visual}
+            except Exception:
+                pass
+
     pages_spec = []
     for p in pages_list_from_def:
         page_name = p.get("page_name", "")
@@ -443,6 +439,11 @@ def run_report_intelligence_engine() -> Dict[str, Any]:
             dims = v.get("dimensions", [])
             meas = v.get("measures", [])
             
+            # Enrich visual type from reporting intent
+            intent_info = intent_map.get(v_title, {})
+            if intent_info and intent_info.get("visual"):
+                raw_type = intent_info["visual"]
+
             optimal_type = determine_optimal_visual_type(
                 dimensions=dims,
                 measures=meas,

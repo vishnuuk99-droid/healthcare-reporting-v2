@@ -103,6 +103,16 @@ Rules:
 - Be thorough — a comprehensive CMS report needs 20+ measures.
 - Show dependency chains: if "Adverse Rate" depends on "Total Adverse"
   and "Total Decisions", generate all three and specify dependencies correctly.
+
+Additionally, if structured metric definitions are provided:
+- Set numerator_definition to the numerator from the structured metric.
+- Set denominator_definition to the denominator from the structured metric.
+- Set exclusion_filters to the exclusion_rules from the structured metric.
+- Set timeliness_threshold to the timeliness_days value.
+- Use inclusion_rules and exclusion_rules to generate accurate
+  formula_description values that reflect actual business logic.
+- Do NOT generate placeholder measures. Every measure must be traceable
+  to a specific CMS metric definition.
 """
 
 
@@ -125,6 +135,74 @@ def _load_json_file(path: Path) -> dict | list | None:
         return None
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def validate_structured_metrics(structured_metrics: list[dict]) -> dict:
+    """
+    Semantic validation checkpoint (Enhancement 4).
+    Validates structured metric definitions before measure generation.
+
+    Returns:
+        dict with pass/fail status, issues list, and metrics breakdown.
+    """
+    issues = []
+    valid_count = 0
+    low_confidence = []
+
+    required_fields = ["metric_name", "metric_type", "numerator"]
+
+    for sm in structured_metrics:
+        metric_name = sm.get("metric_name", "(unnamed)")
+        missing = [f for f in required_fields if not sm.get(f)]
+
+        if missing:
+            issues.append({
+                "metric": metric_name,
+                "severity": "Error",
+                "issue": f"Missing critical fields: {', '.join(missing)}",
+            })
+        else:
+            valid_count += 1
+
+        # Enhancement 1: Flag low-confidence interpretations
+        confidence = sm.get("confidence_score", 0.0)
+        if confidence < 0.80:
+            low_confidence.append({
+                "metric": metric_name,
+                "confidence": confidence,
+                "notes": sm.get("extraction_notes", ""),
+            })
+
+        # Enhancement 2: Validate reporting period structure
+        rp_type = sm.get("reporting_period_type", "")
+        if rp_type and rp_type not in ("Quarterly", "Annual", "Monthly", "PointInTime"):
+            issues.append({
+                "metric": metric_name,
+                "severity": "Warning",
+                "issue": f"Invalid reporting_period_type: '{rp_type}'",
+            })
+
+        # Validate metric_type
+        valid_types = {"Count", "Sum", "Average", "Percentage", "Ratio", "Distinct Count"}
+        mt = sm.get("metric_type", "")
+        if mt and mt not in valid_types:
+            issues.append({
+                "metric": metric_name,
+                "severity": "Warning",
+                "issue": f"Invalid metric_type: '{mt}'",
+            })
+
+    total = len(structured_metrics)
+    pass_rate = (valid_count / total * 100) if total > 0 else 0.0
+
+    return {
+        "status": "PASS" if pass_rate >= 50.0 else "FAIL",
+        "total_metrics": total,
+        "valid_metrics": valid_count,
+        "pass_rate": round(pass_rate, 1),
+        "issues": issues,
+        "low_confidence_metrics": low_confidence,
+    }
 
 
 def generate_measures(
@@ -162,6 +240,17 @@ def generate_measures(
     if not decisions:
         decisions = _load_json_file(_DECISIONS_FILE) or []
 
+    # Semantic validation checkpoint (Enhancement 4)
+    structured_metrics = requirements.get("structured_metrics", []) if requirements else []
+    if structured_metrics:
+        validation = validate_structured_metrics(structured_metrics)
+        if validation["status"] == "FAIL":
+            raise ValueError(
+                f"Semantic validation failed. Pass rate: {validation['pass_rate']}%. "
+                f"Issues: {json.dumps(validation['issues'], indent=2)}\n"
+                f"Fix structured metric definitions before generating measures."
+            )
+
     # Build context
     context_parts = []
 
@@ -197,6 +286,18 @@ def generate_measures(
         context_parts.append(
             f"=== ORGANIZATIONAL DECISIONS ===\n"
             f"{json.dumps(decisions, indent=2)}"
+        )
+
+    if structured_metrics:
+        context_parts.append(
+            f"=== STRUCTURED METRIC DEFINITIONS ===\n"
+            f"These contain the authoritative numerator, denominator, "
+            f"inclusion/exclusion rules, and timeliness thresholds.\n"
+            f"Use these to populate numerator_definition, denominator_definition, "
+            f"exclusion_filters, and timeliness_threshold on each measure.\n"
+            f"Every measure MUST trace back to:\n"
+            f"  Metric Definition → Numerator → Denominator → Aggregation Logic\n"
+            f"{json.dumps(structured_metrics, indent=2)}"
         )
 
     content = "\n\n".join(context_parts)

@@ -40,6 +40,32 @@ Analyze the provided document text carefully and extract:
 Be thorough. Extract every requirement you can identify from the text.
 If a field has no relevant information in the document, leave it as an
 empty string or empty list as appropriate.
+
+Additionally, for EACH metric identified above, also produce a structured
+decomposition in the 'structured_metrics' list:
+
+- metric_name: Exactly matching the metric string in the 'metrics' list.
+- metric_type: Count, Sum, Average, Percentage, Ratio, or Distinct Count.
+- business_definition: What this metric measures and why.
+- numerator: The population/value being counted or summed.
+  Example: "Grievances where the MAO provided a decision during the
+  reporting period, excluding dismissed and withdrawn grievances."
+- denominator: The denominator population. Empty for Count/Sum metrics.
+- inclusion_rules: Criteria records MUST meet.
+- exclusion_rules: Criteria that exclude records.
+- timeliness_days: Regulatory threshold in days (0 if not applicable).
+- reporting_period_type: Exactly one of: Quarterly, Annual, Monthly, PointInTime.
+- period_anchor: The date field (e.g., decision_date, notification_date,
+  enrollment_date, payment_date, appeal_date).
+- cms_element_reference: CMS element/section ref (e.g., "Element A").
+- confidence_score: Float 0.0-1.0. Use 1.0 for clearly defined metrics,
+  0.8 for metrics with minor ambiguity, 0.5 for metrics requiring
+  significant interpretation.
+- extraction_notes: Your reasoning and assumptions while interpreting
+  this metric.
+
+Important: The structured_metrics list must have ONE entry for EVERY
+metric in the metrics list. Do not skip any metric.
 """
 
 

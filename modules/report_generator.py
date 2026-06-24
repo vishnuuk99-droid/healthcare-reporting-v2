@@ -106,6 +106,7 @@ def _load_analytics_model() -> dict | None:
 
 def generate_report_definition(
     requirements: dict,
+    reporting_intent: list[dict] | None = None,
     decisions: list[dict] | None = None,
 ) -> ReportDefinition:
     """
@@ -113,6 +114,7 @@ def generate_report_definition(
 
     Args:
         requirements: The extracted CMS requirements dict.
+        reporting_intent: The classified reporting intents list (optional).
         decisions: Organizational decisions list (optional).
 
     Returns:
@@ -138,6 +140,11 @@ def generate_report_definition(
     context_parts.append(
         f"=== CMS REQUIREMENTS ===\n{json.dumps(requirements, indent=2)}"
     )
+
+    if reporting_intent:
+        context_parts.append(
+            f"=== REPORTING INTENT ===\n{json.dumps(reporting_intent, indent=2)}"
+        )
 
     if decisions:
         context_parts.append(

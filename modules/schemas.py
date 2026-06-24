@@ -5,6 +5,62 @@ Pydantic models for structured CMS requirement extraction.
 from pydantic import BaseModel, Field
 
 
+class StructuredMetricDef(BaseModel):
+    """A CMS metric decomposed into its business logic components."""
+
+    metric_name: str = Field(
+        description="The exact metric name from the CMS document.",
+    )
+    metric_type: str = Field(
+        default="Count",
+        description="Aggregation type: Count, Sum, Average, Percentage, Ratio, Distinct Count.",
+    )
+    business_definition: str = Field(
+        default="",
+        description="Plain-language explanation of what this metric measures.",
+    )
+    numerator: str = Field(
+        default="",
+        description="Description of the numerator population or value.",
+    )
+    denominator: str = Field(
+        default="",
+        description="Description of the denominator population or value. Empty for Count/Sum metrics.",
+    )
+    inclusion_rules: list[str] = Field(
+        default_factory=list,
+        description="Criteria that records MUST meet to be included in this metric.",
+    )
+    exclusion_rules: list[str] = Field(
+        default_factory=list,
+        description="Criteria that exclude records from this metric.",
+    )
+    timeliness_days: int = Field(
+        default=0,
+        description="Regulatory timeliness threshold in days (0 if not applicable).",
+    )
+    reporting_period_type: str = Field(
+        default="",
+        description="Period type: Quarterly, Annual, Monthly, or PointInTime.",
+    )
+    period_anchor: str = Field(
+        default="",
+        description="Date field the reporting period is anchored to (e.g., decision_date, notification_date, enrollment_date, payment_date).",
+    )
+    cms_element_reference: str = Field(
+        default="",
+        description="CMS element reference identifier (e.g., 'Element A', 'Section I.A').",
+    )
+    confidence_score: float = Field(
+        default=0.0,
+        description="Model confidence (0.0-1.0) that the metric was correctly interpreted.",
+    )
+    extraction_notes: str = Field(
+        default="",
+        description="Reasoning and assumptions used while interpreting the CMS metric.",
+    )
+
+
 class CMSRequirements(BaseModel):
     """Structured representation of requirements extracted from a CMS document."""
 
@@ -47,6 +103,10 @@ class CMSRequirements(BaseModel):
     notes: list[str] = Field(
         default_factory=list,
         description="Additional observations, caveats, or context from the document.",
+    )
+    structured_metrics: list[StructuredMetricDef] = Field(
+        default_factory=list,
+        description="Structured decomposition of each metric with numerator, denominator, rules, and timeliness.",
     )
 
 
@@ -438,6 +498,22 @@ class MeasureEntry(BaseModel):
         default_factory=list,
         description="Titles of visuals where this measure is used.",
     )
+    numerator_definition: str = Field(
+        default="",
+        description="Numerator logic from the structured metric definition.",
+    )
+    denominator_definition: str = Field(
+        default="",
+        description="Denominator logic from the structured metric definition.",
+    )
+    exclusion_filters: list[str] = Field(
+        default_factory=list,
+        description="Exclusion rules that must be applied as DAX FILTER conditions.",
+    )
+    timeliness_threshold: int = Field(
+        default=0,
+        description="Timeliness threshold in days, from the CMS requirement.",
+    )
 
 
 class MeasureSet(BaseModel):
@@ -468,6 +544,14 @@ class DAXEntry(BaseModel):
     dependencies: list[str] = Field(
         default_factory=list,
         description="Names of other DAX measures this measure depends on.",
+    )
+    format_string: str = Field(
+        default="",
+        description="Power BI format string (e.g., '#,##0', '0.0%').",
+    )
+    home_table: str = Field(
+        default="_Measures",
+        description="The table this measure is homed to in the semantic model.",
     )
 
 

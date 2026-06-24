@@ -146,6 +146,13 @@ def generate_reporting_intents(
         f"=== CMS REQUIREMENTS ===\n{json.dumps(requirements, indent=2)}"
     )
 
+    structured_metrics = requirements.get("structured_metrics", [])
+    if structured_metrics:
+        context_parts.append(
+            f"=== STRUCTURED METRIC DEFINITIONS ===\n"
+            f"{json.dumps(structured_metrics, indent=2)}"
+        )
+
     context_parts.append(
         f"=== STAR SCHEMA ANALYTICS MODEL ===\n"
         f"{json.dumps(analytics_model, indent=2)}"
