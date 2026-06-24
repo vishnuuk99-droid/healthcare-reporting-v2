@@ -322,5 +322,71 @@
       "FactObservation.observation_code"
     ],
     "reasoning": "This is a compliance monitoring rule ensuring strict isolation of Part C reporting from prior authorization metrics per organizational decision c19cd11c."
+  },
+  {
+    "reporting_intent": "Detail Listing",
+    "business_question": "Total number of enrollment requests",
+    "metrics": [
+      {
+        "metric_name": "Total number of enrollment requests",
+        "description": "Total number of enrollment requests",
+        "calculation": "Count"
+      }
+    ]
+  },
+  {
+    "reporting_intent": "Detail Listing",
+    "business_question": "Total number of enrollment requests requiring additional information",
+    "metrics": [
+      {
+        "metric_name": "Total number of enrollment requests requiring additional information",
+        "description": "Total number of enrollment requests requiring additional information",
+        "calculation": "Count"
+      }
+    ]
+  },
+  {
+    "reporting_intent": "Detail Listing",
+    "business_question": "Total number of voluntary disenrollment transactions",
+    "metrics": [
+      {
+        "metric_name": "Total number of voluntary disenrollment transactions",
+        "description": "Total number of voluntary disenrollment transactions",
+        "calculation": "Count"
+      }
+    ]
+  },
+  {
+    "reporting_intent": "Detail Listing",
+    "business_question": "Rewards and Incentives Programs: Number of currently enrolled members (Element G)",
+    "metrics": [
+      {
+        "metric_name": "Rewards and Incentives Programs: Number of currently enrolled members",
+        "description": "Rewards and Incentives Programs: Number of currently enrolled members (Element G)",
+        "calculation": "Count"
+      }
+    ]
+  },
+  {
+    "reporting_intent": "Detail Listing",
+    "business_question": "Rewards and Incentives Programs: Number of rewards made so far (Element H)",
+    "metrics": [
+      {
+        "metric_name": "Rewards and Incentives Programs: Number of rewards made so far",
+        "description": "Rewards and Incentives Programs: Number of rewards made so far (Element H)",
+        "calculation": "Count"
+      }
+    ]
+  },
+  {
+    "reporting_intent": "Detail Listing",
+    "business_question": "D-SNP Enrollee Advisory Committee (EAC): Count of EAC meetings (Element B)",
+    "metrics": [
+      {
+        "metric_name": "D-SNP Enrollee Advisory Committee",
+        "description": "D-SNP Enrollee Advisory Committee (EAC): Count of EAC meetings (Element B)",
+        "calculation": "Count"
+      }
+    ]
   }
 ]

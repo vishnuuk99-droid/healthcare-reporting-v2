@@ -34,6 +34,27 @@
           ]
         }
       },
+      "prototypeQuery": {
+        "Indicator": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Clean Claim Rate"
+                }
+              },
+              "queryRef": "_Measures.Clean Claim Rate",
+              "nativeQueryRef": "Clean Claim Rate",
+              "active": true
+            }
+          ]
+        }
+      },
       "sortDefinition": {
         "sort": [
           {

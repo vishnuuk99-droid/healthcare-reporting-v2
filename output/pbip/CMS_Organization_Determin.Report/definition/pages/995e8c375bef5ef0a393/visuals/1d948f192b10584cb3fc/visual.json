@@ -103,6 +103,96 @@
           ]
         }
       },
+      "prototypeQuery": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactObservation"
+                    }
+                  },
+                  "Property": "od_number"
+                }
+              },
+              "queryRef": "FactObservation.od_number",
+              "nativeQueryRef": "od_number"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "DimPatient"
+                    }
+                  },
+                  "Property": "mbi"
+                }
+              },
+              "queryRef": "DimPatient.mbi",
+              "nativeQueryRef": "mbi"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactObservation"
+                    }
+                  },
+                  "Property": "processing_priority"
+                }
+              },
+              "queryRef": "FactObservation.processing_priority",
+              "nativeQueryRef": "processing_priority"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactObservation"
+                    }
+                  },
+                  "Property": "disposition"
+                }
+              },
+              "queryRef": "FactObservation.disposition",
+              "nativeQueryRef": "disposition"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactObservation"
+                    }
+                  },
+                  "Property": "decision_rationale"
+                }
+              },
+              "queryRef": "FactObservation.decision_rationale",
+              "nativeQueryRef": "decision_rationale"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Total Org Determinations Override"
+                }
+              },
+              "queryRef": "_Measures.Total Org Determinations Override",
+              "nativeQueryRef": "Total Org Determinations Override"
+            }
+          ]
+        }
+      },
       "sortDefinition": {
         "sort": [
           {

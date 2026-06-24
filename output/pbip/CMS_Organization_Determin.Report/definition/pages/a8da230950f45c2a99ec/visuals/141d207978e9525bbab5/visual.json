@@ -24,11 +24,51 @@
                       "Entity": "DimProvider"
                     }
                   },
-                  "Property": "npi"
+                  "Property": "provider_name"
                 }
               },
-              "queryRef": "DimProvider.npi",
-              "nativeQueryRef": "npi",
+              "queryRef": "DimProvider.provider_name",
+              "nativeQueryRef": "provider_name",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Total Org Determinations Override"
+                }
+              },
+              "queryRef": "_Measures.Total Org Determinations Override",
+              "nativeQueryRef": "Total Org Determinations Override",
+              "active": true
+            }
+          ]
+        }
+      },
+      "prototypeQuery": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "DimProvider"
+                    }
+                  },
+                  "Property": "provider_name"
+                }
+              },
+              "queryRef": "DimProvider.provider_name",
+              "nativeQueryRef": "provider_name",
               "active": true
             }
           ]
@@ -63,7 +103,7 @@
                     "Entity": "DimProvider"
                   }
                 },
-                "Property": "npi"
+                "Property": "provider_name"
               }
             },
             "direction": "Ascending"

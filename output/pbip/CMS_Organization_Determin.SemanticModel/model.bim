@@ -253,6 +253,28 @@
         "description": "Captures Part B drug requests and approvals."
       },
       {
+        "name": "FactRewardsAndIncentives",
+        "columns": [
+          {
+            "name": "RewardID",
+            "dataType": "string",
+            "sourceColumn": "RewardID"
+          }
+        ],
+        "measures": [],
+        "partitions": [
+          {
+            "name": "FactRewardsAndIncentives-partition",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n    Source = Table.FromRecords({\n        [RewardID = \"Mock RewardID 1\"],\n        [RewardID = \"Mock RewardID 2\"],\n        [RewardID = \"Mock RewardID 3\"],\n        [RewardID = \"Mock RewardID 4\"],\n        [RewardID = \"Mock RewardID 5\"]\n    }),\n    #\"Changed Type\" = Table.TransformColumnTypes(Source, {\n        {\"RewardID\", type text}\n    })\nin\n    #\"Changed Type\""
+            }
+          }
+        ],
+        "description": "Rewards and incentives data"
+      },
+      {
         "name": "DimPatient",
         "columns": [
           {
@@ -492,6 +514,270 @@
             "name": "Quality Trend",
             "expression": "[Data Quality Score]",
             "description": "Historical data quality score trend."
+          },
+          {
+            "name": "Total_number_of_grievances",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Total number of grievances'))"
+          },
+          {
+            "name": "Total_number_of_timely_notifications_of_grievance_decisions",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Total number of timely notifications of grievance decisions'))"
+          },
+          {
+            "name": "Number_of_expedited_grievances",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Number of expedited grievances'))"
+          },
+          {
+            "name": "Number_of_dismissed_grievances",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Number of dismissed grievances'))"
+          },
+          {
+            "name": "Number_of_completed_organization_determinations",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Number of completed organization determinations (fully favorable, partially favorable, adverse)'))"
+          },
+          {
+            "name": "Number_of_completed_reconsiderations",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Number of completed reconsiderations (fully favorable, partially favorable, adverse)'))"
+          },
+          {
+            "name": "Number_of_withdrawn_coverage_requests",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Number of withdrawn coverage requests'))"
+          },
+          {
+            "name": "Number_of_dismissed_coverage_requests",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Number of dismissed coverage requests'))"
+          },
+          {
+            "name": "Number_of_reopened_organization_determinations_and_reconsiderations",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Number of reopened organization determinations and reconsiderations'))"
+          },
+          {
+            "name": "Employer_Group_Plan_Sponsor_enrollment_count_as_of_the_last_day_of_the_reporting_period",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Employer Group Plan Sponsor enrollment count as of the last day of the reporting period'))"
+          },
+          {
+            "name": "SNP_Care_Management:_Number_of_eligible_enrollees",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('SNP Care Management: Number of eligible enrollees (Element A)'))"
+          },
+          {
+            "name": "SNP_Care_Management:_Number_of_enrollees_eligible_for_an_annual_reassessment",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('SNP Care Management: Number of enrollees eligible for an annual reassessment (Element B)'))"
+          },
+          {
+            "name": "SNP_Care_Management:_Number_of_initial_HRAs_completed",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('SNP Care Management: Number of initial HRAs completed (Element C)'))"
+          },
+          {
+            "name": "SNP_Care_Management:_Number_of_initial_HRAs_refused",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('SNP Care Management: Number of initial HRAs refused (Element D)'))"
+          },
+          {
+            "name": "SNP_Care_Management:_Number_of_initial_HRAs_where_enrollee_was_unable_to_be_reached",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('SNP Care Management: Number of initial HRAs where enrollee was unable to be reached (Element E)'))"
+          },
+          {
+            "name": "SNP_Care_Management:_Number_of_reassessments_completed",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('SNP Care Management: Number of reassessments completed (Element F)'))"
+          },
+          {
+            "name": "SNP_Care_Management:_Number_of_reassessments_refused",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('SNP Care Management: Number of reassessments refused (Element G)'))"
+          },
+          {
+            "name": "SNP_Care_Management:_Number_of_reassessments_where_enrollee_was_unable_to_be_reached",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('SNP Care Management: Number of reassessments where enrollee was unable to be reached (Element H)'))"
+          },
+          {
+            "name": "Total_number_of_enrollment_requests",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Total number of enrollment requests'))"
+          },
+          {
+            "name": "Total_number_of_enrollment_requests_requiring_additional_information",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Total number of enrollment requests requiring additional information'))"
+          },
+          {
+            "name": "Total_number_of_voluntary_disenrollment_transactions",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Total number of voluntary disenrollment transactions'))"
+          },
+          {
+            "name": "Rewards_and_Incentives_Programs:_Number_of_currently_enrolled_members",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Rewards and Incentives Programs: Number of currently enrolled members (Element G)'))"
+          },
+          {
+            "name": "Rewards_and_Incentives_Programs:_Number_of_rewards_made_so_far",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Rewards and Incentives Programs: Number of rewards made so far (Element H)'))"
+          },
+          {
+            "name": "Payments_to_Providers:_Total_actual_payments_made_to_contracted_providers",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Payments to Providers: Total actual payments made to contracted providers (Element A)'))"
+          },
+          {
+            "name": "Payments_to_Providers:_Payments_by_value-based_payment_categories",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Payments to Providers: Payments by value-based payment categories (Categories 1, 2, 3, and 4)'))"
+          },
+          {
+            "name": "Supplemental_Benefit_Utilization_and_Costs:_Unique_count_of_eligible_enrollees",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Supplemental Benefit Utilization and Costs: Unique count of eligible enrollees (Element H)'))"
+          },
+          {
+            "name": "Supplemental_Benefit_Utilization_and_Costs:_Number_of_enrollees_utilizing_benefit",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Supplemental Benefit Utilization and Costs: Number of enrollees utilizing benefit (Element I)'))"
+          },
+          {
+            "name": "Supplemental_Benefit_Utilization_and_Costs:_Units_of_utilization",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Supplemental Benefit Utilization and Costs: Units of utilization (Element G)'))"
+          },
+          {
+            "name": "Supplemental_Benefit_Utilization_and_Costs:_Total_net_amount_incurred_by_the_plan",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Supplemental Benefit Utilization and Costs: Total net amount incurred by the plan (Element L)'))"
+          },
+          {
+            "name": "Supplemental_Benefit_Utilization_and_Costs:_Total_enrollee_out-of-pocket_costs",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('Supplemental Benefit Utilization and Costs: Total enrollee out-of-pocket costs (Element O)'))"
+          },
+          {
+            "name": "D-SNP_Enrollee_Advisory_Committee",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('D-SNP Enrollee Advisory Committee (EAC): Count of EAC meetings (Element B)'))"
+          },
+          {
+            "name": "D-SNP_Transmission_of_Admission_Notifications:_Count_of_hospital_and_SNF_admissions",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('D-SNP Transmission of Admission Notifications: Count of hospital and SNF admissions (Element A)'))"
+          },
+          {
+            "name": "D-SNP_Transmission_of_Admission_Notifications:_Count_of_notifications_to_the_state_or_state-designated_entity",
+            "expression": "CALCULATE(COUNTROWS(FactEncounter), KEEPFILTERS('D-SNP Transmission of Admission Notifications: Count of notifications to the state or state-designated entity (Element B)'))"
+          },
+          {
+            "name": "Total number of grievances",
+            "expression": "Total number of grievances"
+          },
+          {
+            "name": "Total number of timely notifications of grievance decisions",
+            "expression": "Total number of timely notifications of grievance decisions"
+          },
+          {
+            "name": "Number of expedited grievances",
+            "expression": "Number of expedited grievances"
+          },
+          {
+            "name": "Number of dismissed grievances",
+            "expression": "Number of dismissed grievances"
+          },
+          {
+            "name": "Number of completed organization determinations (fully favorable, partially favorable, adverse)",
+            "expression": "Number of completed organization determinations (fully favorable, partially favorable, adverse)"
+          },
+          {
+            "name": "Number of completed reconsiderations (fully favorable, partially favorable, adverse)",
+            "expression": "Number of completed reconsiderations (fully favorable, partially favorable, adverse)"
+          },
+          {
+            "name": "Number of withdrawn coverage requests",
+            "expression": "Number of withdrawn coverage requests"
+          },
+          {
+            "name": "Number of dismissed coverage requests",
+            "expression": "Number of dismissed coverage requests"
+          },
+          {
+            "name": "Number of reopened organization determinations and reconsiderations",
+            "expression": "Number of reopened organization determinations and reconsiderations"
+          },
+          {
+            "name": "Employer Group Plan Sponsor enrollment count as of the last day of the reporting period",
+            "expression": "Employer Group Plan Sponsor enrollment count as of the last day of the reporting period"
+          },
+          {
+            "name": "SNP Care Management: Number of eligible enrollees (Element A)",
+            "expression": "SNP Care Management: Number of eligible enrollees (Element A)"
+          },
+          {
+            "name": "SNP Care Management: Number of enrollees eligible for an annual reassessment (Element B)",
+            "expression": "SNP Care Management: Number of enrollees eligible for an annual reassessment (Element B)"
+          },
+          {
+            "name": "SNP Care Management: Number of initial HRAs completed (Element C)",
+            "expression": "SNP Care Management: Number of initial HRAs completed (Element C)"
+          },
+          {
+            "name": "SNP Care Management: Number of initial HRAs refused (Element D)",
+            "expression": "SNP Care Management: Number of initial HRAs refused (Element D)"
+          },
+          {
+            "name": "SNP Care Management: Number of initial HRAs where enrollee was unable to be reached (Element E)",
+            "expression": "SNP Care Management: Number of initial HRAs where enrollee was unable to be reached (Element E)"
+          },
+          {
+            "name": "SNP Care Management: Number of reassessments completed (Element F)",
+            "expression": "SNP Care Management: Number of reassessments completed (Element F)"
+          },
+          {
+            "name": "SNP Care Management: Number of reassessments refused (Element G)",
+            "expression": "SNP Care Management: Number of reassessments refused (Element G)"
+          },
+          {
+            "name": "SNP Care Management: Number of reassessments where enrollee was unable to be reached (Element H)",
+            "expression": "SNP Care Management: Number of reassessments where enrollee was unable to be reached (Element H)"
+          },
+          {
+            "name": "Total number of enrollment requests",
+            "expression": "Total number of enrollment requests"
+          },
+          {
+            "name": "Total number of enrollment requests requiring additional information",
+            "expression": "Total number of enrollment requests requiring additional information"
+          },
+          {
+            "name": "Total number of voluntary disenrollment transactions",
+            "expression": "Total number of voluntary disenrollment transactions"
+          },
+          {
+            "name": "Rewards and Incentives Programs: Number of currently enrolled members (Element G)",
+            "expression": "Rewards and Incentives Programs: Number of currently enrolled members (Element G)"
+          },
+          {
+            "name": "Rewards and Incentives Programs: Number of rewards made so far (Element H)",
+            "expression": "Rewards and Incentives Programs: Number of rewards made so far (Element H)"
+          },
+          {
+            "name": "Payments to Providers: Total actual payments made to contracted providers (Element A)",
+            "expression": "Payments to Providers: Total actual payments made to contracted providers (Element A)"
+          },
+          {
+            "name": "Payments to Providers: Payments by value-based payment categories (Categories 1, 2, 3, and 4)",
+            "expression": "Payments to Providers: Payments by value-based payment categories (Categories 1, 2, 3, and 4)"
+          },
+          {
+            "name": "Supplemental Benefit Utilization and Costs: Unique count of eligible enrollees (Element H)",
+            "expression": "Supplemental Benefit Utilization and Costs: Unique count of eligible enrollees (Element H)"
+          },
+          {
+            "name": "Supplemental Benefit Utilization and Costs: Number of enrollees utilizing benefit (Element I)",
+            "expression": "Supplemental Benefit Utilization and Costs: Number of enrollees utilizing benefit (Element I)"
+          },
+          {
+            "name": "Supplemental Benefit Utilization and Costs: Units of utilization (Element G)",
+            "expression": "Supplemental Benefit Utilization and Costs: Units of utilization (Element G)"
+          },
+          {
+            "name": "Supplemental Benefit Utilization and Costs: Total net amount incurred by the plan (Element L)",
+            "expression": "Supplemental Benefit Utilization and Costs: Total net amount incurred by the plan (Element L)"
+          },
+          {
+            "name": "Supplemental Benefit Utilization and Costs: Total enrollee out-of-pocket costs (Element O)",
+            "expression": "Supplemental Benefit Utilization and Costs: Total enrollee out-of-pocket costs (Element O)"
+          },
+          {
+            "name": "D-SNP Enrollee Advisory Committee (EAC): Count of EAC meetings (Element B)",
+            "expression": "D-SNP Enrollee Advisory Committee (EAC): Count of EAC meetings (Element B)"
+          },
+          {
+            "name": "D-SNP Transmission of Admission Notifications: Count of hospital and SNF admissions (Element A)",
+            "expression": "D-SNP Transmission of Admission Notifications: Count of hospital and SNF admissions (Element A)"
+          },
+          {
+            "name": "D-SNP Transmission of Admission Notifications: Count of notifications to the state or state-designated entity (Element B)",
+            "expression": "D-SNP Transmission of Admission Notifications: Count of notifications to the state or state-designated entity (Element B)"
           }
         ],
         "partitions": [

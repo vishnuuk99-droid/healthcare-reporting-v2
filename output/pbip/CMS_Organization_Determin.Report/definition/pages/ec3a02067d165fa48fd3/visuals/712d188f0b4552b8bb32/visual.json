@@ -1,0 +1,118 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "712d188f0b4552b8bb32",
+  "position": {
+    "x": 20,
+    "y": 2230,
+    "z": 0,
+    "width": 280,
+    "height": 150,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "SNP Care Management: Number of reassessments completed (Element F)"
+                }
+              },
+              "queryRef": "_Measures.SNP Care Management: Number of reassessments completed (Element F)",
+              "nativeQueryRef": "SNP Care Management: Number of reassessments completed (Element F)",
+              "active": true
+            }
+          ]
+        }
+      },
+      "prototypeQuery": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "SNP Care Management: Number of reassessments completed (Element F)"
+                }
+              },
+              "queryRef": "_Measures.SNP Care Management: Number of reassessments completed (Element F)",
+              "nativeQueryRef": "SNP Care Management: Number of reassessments completed (Element F)",
+              "active": true
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "SNP Care Management: Number of reassessments completed (Element F)"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "visualContainerObjects": {
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 0,
+                      "Percent": -0.5
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'SNP Care Management: Number of reassessments completed (Element F)'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

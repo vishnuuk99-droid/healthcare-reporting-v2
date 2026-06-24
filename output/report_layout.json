@@ -70,6 +70,996 @@
           }
         },
         {
+          "title": "Total number of grievances",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Total number of grievances"
+          ],
+          "business_reason": "Total number of grievances",
+          "position": {
+            "x": 20,
+            "y": 190,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Total number of timely notifications of grievance decisions",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Total number of timely notifications of grievance decisions"
+          ],
+          "business_reason": "Total number of timely notifications of grievance decisions",
+          "position": {
+            "x": 320,
+            "y": 190,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Number of expedited grievances",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Number of expedited grievances"
+          ],
+          "business_reason": "Number of expedited grievances",
+          "position": {
+            "x": 620,
+            "y": 190,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Number of dismissed grievances",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Number of dismissed grievances"
+          ],
+          "business_reason": "Number of dismissed grievances",
+          "position": {
+            "x": 920,
+            "y": 190,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Number of completed organization determinations",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Number of completed organization determinations"
+          ],
+          "business_reason": "Number of completed organization determinations",
+          "position": {
+            "x": 20,
+            "y": 360,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Number of completed reconsiderations",
+          "visual_type": "kpi",
+          "dimensions": [],
+          "measures": [
+            "Number of completed reconsiderations"
+          ],
+          "business_reason": "Number of completed reconsiderations",
+          "position": {
+            "x": 320,
+            "y": 360,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Number of withdrawn coverage requests",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Number of withdrawn coverage requests"
+          ],
+          "business_reason": "Number of withdrawn coverage requests",
+          "position": {
+            "x": 620,
+            "y": 360,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Number of dismissed coverage requests",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Number of dismissed coverage requests"
+          ],
+          "business_reason": "Number of dismissed coverage requests",
+          "position": {
+            "x": 920,
+            "y": 360,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Number of reopened organization determinations and reconsiderations",
+          "visual_type": "kpi",
+          "dimensions": [],
+          "measures": [
+            "Number of reopened organization determinations and reconsiderations"
+          ],
+          "business_reason": "Number of reopened organization determinations and reconsiderations",
+          "position": {
+            "x": 20,
+            "y": 530,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Employer Group Plan Sponsor enrollment count as of the last day of the reporting period",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Employer Group Plan Sponsor enrollment count as of the last day of the reporting period"
+          ],
+          "business_reason": "Employer Group Plan Sponsor enrollment count as of the last day of the reporting period",
+          "position": {
+            "x": 320,
+            "y": 530,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "SNP Care Management: Number of eligible enrollees",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "SNP Care Management: Number of eligible enrollees"
+          ],
+          "business_reason": "SNP Care Management: Number of eligible enrollees",
+          "position": {
+            "x": 620,
+            "y": 530,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "SNP Care Management: Number of enrollees eligible for an annual reassessment",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "SNP Care Management: Number of enrollees eligible for an annual reassessment"
+          ],
+          "business_reason": "SNP Care Management: Number of enrollees eligible for an annual reassessment",
+          "position": {
+            "x": 920,
+            "y": 530,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "SNP Care Management: Number of initial HRAs completed",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "SNP Care Management: Number of initial HRAs completed"
+          ],
+          "business_reason": "SNP Care Management: Number of initial HRAs completed",
+          "position": {
+            "x": 20,
+            "y": 700,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "SNP Care Management: Number of initial HRAs refused",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "SNP Care Management: Number of initial HRAs refused"
+          ],
+          "business_reason": "SNP Care Management: Number of initial HRAs refused",
+          "position": {
+            "x": 320,
+            "y": 700,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "SNP Care Management: Number of initial HRAs where enrollee was unable to be reached",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "SNP Care Management: Number of initial HRAs where enrollee was unable to be reached"
+          ],
+          "business_reason": "SNP Care Management: Number of initial HRAs where enrollee was unable to be reached",
+          "position": {
+            "x": 620,
+            "y": 700,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "SNP Care Management: Number of reassessments completed",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "SNP Care Management: Number of reassessments completed"
+          ],
+          "business_reason": "SNP Care Management: Number of reassessments completed",
+          "position": {
+            "x": 920,
+            "y": 700,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "SNP Care Management: Number of reassessments refused",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "SNP Care Management: Number of reassessments refused"
+          ],
+          "business_reason": "SNP Care Management: Number of reassessments refused",
+          "position": {
+            "x": 20,
+            "y": 870,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "SNP Care Management: Number of reassessments where enrollee was unable to be reached",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "SNP Care Management: Number of reassessments where enrollee was unable to be reached"
+          ],
+          "business_reason": "SNP Care Management: Number of reassessments where enrollee was unable to be reached",
+          "position": {
+            "x": 320,
+            "y": 870,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Total number of enrollment requests",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Total number of enrollment requests"
+          ],
+          "business_reason": "Total number of enrollment requests",
+          "position": {
+            "x": 620,
+            "y": 870,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Total number of enrollment requests requiring additional information",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Total number of enrollment requests requiring additional information"
+          ],
+          "business_reason": "Total number of enrollment requests requiring additional information",
+          "position": {
+            "x": 920,
+            "y": 870,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Total number of voluntary disenrollment transactions",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Total number of voluntary disenrollment transactions"
+          ],
+          "business_reason": "Total number of voluntary disenrollment transactions",
+          "position": {
+            "x": 20,
+            "y": 1040,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Rewards and Incentives Programs: Number of currently enrolled members",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Rewards and Incentives Programs: Number of currently enrolled members"
+          ],
+          "business_reason": "Rewards and Incentives Programs: Number of currently enrolled members",
+          "position": {
+            "x": 320,
+            "y": 1040,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Rewards and Incentives Programs: Number of rewards made so far",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Rewards and Incentives Programs: Number of rewards made so far"
+          ],
+          "business_reason": "Rewards and Incentives Programs: Number of rewards made so far",
+          "position": {
+            "x": 620,
+            "y": 1040,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Payments to Providers: Total actual payments made to contracted providers",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Payments to Providers: Total actual payments made to contracted providers"
+          ],
+          "business_reason": "Payments to Providers: Total actual payments made to contracted providers",
+          "position": {
+            "x": 920,
+            "y": 1040,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Payments to Providers: Payments by value-based payment categories",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Payments to Providers: Payments by value-based payment categories"
+          ],
+          "business_reason": "Payments to Providers: Payments by value-based payment categories",
+          "position": {
+            "x": 20,
+            "y": 1210,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Supplemental Benefit Utilization and Costs: Unique count of eligible enrollees",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Supplemental Benefit Utilization and Costs: Unique count of eligible enrollees"
+          ],
+          "business_reason": "Supplemental Benefit Utilization and Costs: Unique count of eligible enrollees",
+          "position": {
+            "x": 320,
+            "y": 1210,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Supplemental Benefit Utilization and Costs: Number of enrollees utilizing benefit",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Supplemental Benefit Utilization and Costs: Number of enrollees utilizing benefit"
+          ],
+          "business_reason": "Supplemental Benefit Utilization and Costs: Number of enrollees utilizing benefit",
+          "position": {
+            "x": 620,
+            "y": 1210,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Supplemental Benefit Utilization and Costs: Units of utilization",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Supplemental Benefit Utilization and Costs: Units of utilization"
+          ],
+          "business_reason": "Supplemental Benefit Utilization and Costs: Units of utilization",
+          "position": {
+            "x": 920,
+            "y": 1210,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Supplemental Benefit Utilization and Costs: Total net amount incurred by the plan",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Supplemental Benefit Utilization and Costs: Total net amount incurred by the plan"
+          ],
+          "business_reason": "Supplemental Benefit Utilization and Costs: Total net amount incurred by the plan",
+          "position": {
+            "x": 20,
+            "y": 1380,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Supplemental Benefit Utilization and Costs: Total enrollee out-of-pocket costs",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Supplemental Benefit Utilization and Costs: Total enrollee out-of-pocket costs"
+          ],
+          "business_reason": "Supplemental Benefit Utilization and Costs: Total enrollee out-of-pocket costs",
+          "position": {
+            "x": 320,
+            "y": 1380,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "D-SNP Enrollee Advisory Committee",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "D-SNP Enrollee Advisory Committee"
+          ],
+          "business_reason": "D-SNP Enrollee Advisory Committee",
+          "position": {
+            "x": 620,
+            "y": 1380,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "D-SNP Transmission of Admission Notifications: Count of hospital and SNF admissions",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "D-SNP Transmission of Admission Notifications: Count of hospital and SNF admissions"
+          ],
+          "business_reason": "D-SNP Transmission of Admission Notifications: Count of hospital and SNF admissions",
+          "position": {
+            "x": 920,
+            "y": 1380,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "D-SNP Transmission of Admission Notifications: Count of notifications to the state or state-designated entity",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "D-SNP Transmission of Admission Notifications: Count of notifications to the state or state-designated entity"
+          ],
+          "business_reason": "D-SNP Transmission of Admission Notifications: Count of notifications to the state or state-designated entity",
+          "position": {
+            "x": 20,
+            "y": 1550,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Total number of grievances",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Total number of grievances"
+          ],
+          "business_reason": "Total number of grievances",
+          "position": {
+            "x": 320,
+            "y": 1550,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Total number of timely notifications of grievance decisions",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Total number of timely notifications of grievance decisions"
+          ],
+          "business_reason": "Total number of timely notifications of grievance decisions",
+          "position": {
+            "x": 620,
+            "y": 1550,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Number of expedited grievances",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Number of expedited grievances"
+          ],
+          "business_reason": "Number of expedited grievances",
+          "position": {
+            "x": 920,
+            "y": 1550,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Number of dismissed grievances",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Number of dismissed grievances"
+          ],
+          "business_reason": "Number of dismissed grievances",
+          "position": {
+            "x": 20,
+            "y": 1720,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Number of completed organization determinations (fully favorable, partially favorable, adverse)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Number of completed organization determinations (fully favorable, partially favorable, adverse)"
+          ],
+          "business_reason": "Number of completed organization determinations (fully favorable, partially favorable, adverse)",
+          "position": {
+            "x": 320,
+            "y": 1720,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Number of completed reconsiderations (fully favorable, partially favorable, adverse)",
+          "visual_type": "kpi",
+          "dimensions": [],
+          "measures": [
+            "Number of completed reconsiderations (fully favorable, partially favorable, adverse)"
+          ],
+          "business_reason": "Number of completed reconsiderations (fully favorable, partially favorable, adverse)",
+          "position": {
+            "x": 620,
+            "y": 1720,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Number of withdrawn coverage requests",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Number of withdrawn coverage requests"
+          ],
+          "business_reason": "Number of withdrawn coverage requests",
+          "position": {
+            "x": 920,
+            "y": 1720,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Number of dismissed coverage requests",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Number of dismissed coverage requests"
+          ],
+          "business_reason": "Number of dismissed coverage requests",
+          "position": {
+            "x": 20,
+            "y": 1890,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Number of reopened organization determinations and reconsiderations",
+          "visual_type": "kpi",
+          "dimensions": [],
+          "measures": [
+            "Number of reopened organization determinations and reconsiderations"
+          ],
+          "business_reason": "Number of reopened organization determinations and reconsiderations",
+          "position": {
+            "x": 320,
+            "y": 1890,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Employer Group Plan Sponsor enrollment count as of the last day of the reporting period",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Employer Group Plan Sponsor enrollment count as of the last day of the reporting period"
+          ],
+          "business_reason": "Employer Group Plan Sponsor enrollment count as of the last day of the reporting period",
+          "position": {
+            "x": 620,
+            "y": 1890,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "SNP Care Management: Number of eligible enrollees (Element A)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "SNP Care Management: Number of eligible enrollees (Element A)"
+          ],
+          "business_reason": "SNP Care Management: Number of eligible enrollees (Element A)",
+          "position": {
+            "x": 920,
+            "y": 1890,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "SNP Care Management: Number of enrollees eligible for an annual reassessment (Element B)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "SNP Care Management: Number of enrollees eligible for an annual reassessment (Element B)"
+          ],
+          "business_reason": "SNP Care Management: Number of enrollees eligible for an annual reassessment (Element B)",
+          "position": {
+            "x": 20,
+            "y": 2060,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "SNP Care Management: Number of initial HRAs completed (Element C)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "SNP Care Management: Number of initial HRAs completed (Element C)"
+          ],
+          "business_reason": "SNP Care Management: Number of initial HRAs completed (Element C)",
+          "position": {
+            "x": 320,
+            "y": 2060,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "SNP Care Management: Number of initial HRAs refused (Element D)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "SNP Care Management: Number of initial HRAs refused (Element D)"
+          ],
+          "business_reason": "SNP Care Management: Number of initial HRAs refused (Element D)",
+          "position": {
+            "x": 620,
+            "y": 2060,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "SNP Care Management: Number of initial HRAs where enrollee was unable to be reached (Element E)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "SNP Care Management: Number of initial HRAs where enrollee was unable to be reached (Element E)"
+          ],
+          "business_reason": "SNP Care Management: Number of initial HRAs where enrollee was unable to be reached (Element E)",
+          "position": {
+            "x": 920,
+            "y": 2060,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "SNP Care Management: Number of reassessments completed (Element F)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "SNP Care Management: Number of reassessments completed (Element F)"
+          ],
+          "business_reason": "SNP Care Management: Number of reassessments completed (Element F)",
+          "position": {
+            "x": 20,
+            "y": 2230,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "SNP Care Management: Number of reassessments refused (Element G)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "SNP Care Management: Number of reassessments refused (Element G)"
+          ],
+          "business_reason": "SNP Care Management: Number of reassessments refused (Element G)",
+          "position": {
+            "x": 320,
+            "y": 2230,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "SNP Care Management: Number of reassessments where enrollee was unable to be reached (Element H)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "SNP Care Management: Number of reassessments where enrollee was unable to be reached (Element H)"
+          ],
+          "business_reason": "SNP Care Management: Number of reassessments where enrollee was unable to be reached (Element H)",
+          "position": {
+            "x": 620,
+            "y": 2230,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Total number of enrollment requests",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Total number of enrollment requests"
+          ],
+          "business_reason": "Total number of enrollment requests",
+          "position": {
+            "x": 920,
+            "y": 2230,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Total number of enrollment requests requiring additional information",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Total number of enrollment requests requiring additional information"
+          ],
+          "business_reason": "Total number of enrollment requests requiring additional information",
+          "position": {
+            "x": 20,
+            "y": 2400,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Total number of voluntary disenrollment transactions",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Total number of voluntary disenrollment transactions"
+          ],
+          "business_reason": "Total number of voluntary disenrollment transactions",
+          "position": {
+            "x": 320,
+            "y": 2400,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Rewards and Incentives Programs: Number of currently enrolled members (Element G)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Rewards and Incentives Programs: Number of currently enrolled members (Element G)"
+          ],
+          "business_reason": "Rewards and Incentives Programs: Number of currently enrolled members (Element G)",
+          "position": {
+            "x": 620,
+            "y": 2400,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Rewards and Incentives Programs: Number of rewards made so far (Element H)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Rewards and Incentives Programs: Number of rewards made so far (Element H)"
+          ],
+          "business_reason": "Rewards and Incentives Programs: Number of rewards made so far (Element H)",
+          "position": {
+            "x": 920,
+            "y": 2400,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Payments to Providers: Total actual payments made to contracted providers (Element A)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Payments to Providers: Total actual payments made to contracted providers (Element A)"
+          ],
+          "business_reason": "Payments to Providers: Total actual payments made to contracted providers (Element A)",
+          "position": {
+            "x": 20,
+            "y": 2570,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Payments to Providers: Payments by value-based payment categories (Categories 1, 2, 3, and 4)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Payments to Providers: Payments by value-based payment categories (Categories 1, 2, 3, and 4)"
+          ],
+          "business_reason": "Payments to Providers: Payments by value-based payment categories (Categories 1, 2, 3, and 4)",
+          "position": {
+            "x": 320,
+            "y": 2570,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Supplemental Benefit Utilization and Costs: Unique count of eligible enrollees (Element H)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Supplemental Benefit Utilization and Costs: Unique count of eligible enrollees (Element H)"
+          ],
+          "business_reason": "Supplemental Benefit Utilization and Costs: Unique count of eligible enrollees (Element H)",
+          "position": {
+            "x": 620,
+            "y": 2570,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Supplemental Benefit Utilization and Costs: Number of enrollees utilizing benefit (Element I)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Supplemental Benefit Utilization and Costs: Number of enrollees utilizing benefit (Element I)"
+          ],
+          "business_reason": "Supplemental Benefit Utilization and Costs: Number of enrollees utilizing benefit (Element I)",
+          "position": {
+            "x": 920,
+            "y": 2570,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Supplemental Benefit Utilization and Costs: Units of utilization (Element G)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Supplemental Benefit Utilization and Costs: Units of utilization (Element G)"
+          ],
+          "business_reason": "Supplemental Benefit Utilization and Costs: Units of utilization (Element G)",
+          "position": {
+            "x": 20,
+            "y": 2740,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Supplemental Benefit Utilization and Costs: Total net amount incurred by the plan (Element L)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Supplemental Benefit Utilization and Costs: Total net amount incurred by the plan (Element L)"
+          ],
+          "business_reason": "Supplemental Benefit Utilization and Costs: Total net amount incurred by the plan (Element L)",
+          "position": {
+            "x": 320,
+            "y": 2740,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "Supplemental Benefit Utilization and Costs: Total enrollee out-of-pocket costs (Element O)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "Supplemental Benefit Utilization and Costs: Total enrollee out-of-pocket costs (Element O)"
+          ],
+          "business_reason": "Supplemental Benefit Utilization and Costs: Total enrollee out-of-pocket costs (Element O)",
+          "position": {
+            "x": 620,
+            "y": 2740,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "D-SNP Enrollee Advisory Committee (EAC): Count of EAC meetings (Element B)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "D-SNP Enrollee Advisory Committee (EAC): Count of EAC meetings (Element B)"
+          ],
+          "business_reason": "D-SNP Enrollee Advisory Committee (EAC): Count of EAC meetings (Element B)",
+          "position": {
+            "x": 920,
+            "y": 2740,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "D-SNP Transmission of Admission Notifications: Count of hospital and SNF admissions (Element A)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "D-SNP Transmission of Admission Notifications: Count of hospital and SNF admissions (Element A)"
+          ],
+          "business_reason": "D-SNP Transmission of Admission Notifications: Count of hospital and SNF admissions (Element A)",
+          "position": {
+            "x": 20,
+            "y": 2910,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
+          "title": "D-SNP Transmission of Admission Notifications: Count of notifications to the state or state-designated entity (Element B)",
+          "visual_type": "card",
+          "dimensions": [],
+          "measures": [
+            "D-SNP Transmission of Admission Notifications: Count of notifications to the state or state-designated entity (Element B)"
+          ],
+          "business_reason": "D-SNP Transmission of Admission Notifications: Count of notifications to the state or state-designated entity (Element B)",
+          "position": {
+            "x": 320,
+            "y": 2910,
+            "width": 280,
+            "height": 150
+          }
+        },
+        {
           "title": "Monthly Determination Volume Trend",
           "visual_type": "line_chart",
           "dimensions": [
@@ -81,7 +1071,7 @@
           "business_reason": "Monthly Determination Volume Trend",
           "position": {
             "x": 20,
-            "y": 190,
+            "y": 3080,
             "width": 560,
             "height": 320
           }
@@ -98,7 +1088,7 @@
           "business_reason": "Outcome Distribution",
           "position": {
             "x": 600,
-            "y": 190,
+            "y": 3080,
             "width": 560,
             "height": 320
           }

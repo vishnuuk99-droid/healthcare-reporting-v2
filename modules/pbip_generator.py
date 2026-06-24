@@ -470,8 +470,10 @@ def translate_to_pbir_visual(legacy_config: dict) -> dict:
             ]
         }
     else:
+        import copy
         visual_json["visual"]["query"] = {
-            "queryState": query_state
+            "queryState": query_state,
+            "prototypeQuery": copy.deepcopy(query_state)
         }
         if sort_def:
             visual_json["visual"]["query"]["sortDefinition"] = sort_def
@@ -1190,7 +1192,7 @@ def compile_pbip_project() -> dict:
 
     version_json_data = {
         "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/versionMetadata/1.0.0/schema.json",
-        "version": "2.0.0"
+        "version": "1.0"
     }
     version_json_path = report_definition_dir / "version.json"
     _write_json(version_json_path, version_json_data)

@@ -10,7 +10,7 @@
     "tabOrder": 0
   },
   "visual": {
-    "visualType": "donutChart",
+    "visualType": "barChart",
     "drillFilterOtherVisuals": true,
     "query": {
       "queryState": {
@@ -24,11 +24,51 @@
                       "Entity": "DimOrganization"
                     }
                   },
-                  "Property": "organization_type"
+                  "Property": "organization_name"
                 }
               },
-              "queryRef": "DimOrganization.organization_type",
-              "nativeQueryRef": "organization_type",
+              "queryRef": "DimOrganization.organization_name",
+              "nativeQueryRef": "organization_name",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Total Org Determinations Override"
+                }
+              },
+              "queryRef": "_Measures.Total Org Determinations Override",
+              "nativeQueryRef": "Total Org Determinations Override",
+              "active": true
+            }
+          ]
+        }
+      },
+      "prototypeQuery": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "DimOrganization"
+                    }
+                  },
+                  "Property": "organization_name"
+                }
+              },
+              "queryRef": "DimOrganization.organization_name",
+              "nativeQueryRef": "organization_name",
               "active": true
             }
           ]
@@ -63,7 +103,7 @@
                     "Entity": "DimOrganization"
                   }
                 },
-                "Property": "organization_type"
+                "Property": "organization_name"
               }
             },
             "direction": "Ascending"
@@ -80,40 +120,6 @@
               "expr": {
                 "Literal": {
                   "Value": "true"
-                }
-              }
-            },
-            "position": {
-              "expr": {
-                "Literal": {
-                  "Value": "'outside'"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "legend": [
-        {
-          "properties": {
-            "position": {
-              "expr": {
-                "Literal": {
-                  "Value": "'TopCenter'"
-                }
-              }
-            },
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "fontSize": {
-              "expr": {
-                "Literal": {
-                  "Value": "8D"
                 }
               }
             }

@@ -69,6 +69,62 @@
           ]
         }
       },
+      "prototypeQuery": {
+        "Rows": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactObservation"
+                    }
+                  },
+                  "Property": "disposition"
+                }
+              },
+              "queryRef": "FactObservation.disposition",
+              "nativeQueryRef": "disposition"
+            }
+          ]
+        },
+        "Columns": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactObservation"
+                    }
+                  },
+                  "Property": "processing_priority"
+                }
+              },
+              "queryRef": "FactObservation.processing_priority",
+              "nativeQueryRef": "processing_priority"
+            }
+          ]
+        },
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Total Org Determinations Override"
+                }
+              },
+              "queryRef": "_Measures.Total Org Determinations Override",
+              "nativeQueryRef": "Total Org Determinations Override"
+            }
+          ]
+        }
+      },
       "sortDefinition": {
         "sort": [
           {

@@ -1,0 +1,118 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "3146ff19257d5f3297d6",
+  "position": {
+    "x": 20,
+    "y": 2740,
+    "z": 0,
+    "width": 280,
+    "height": 150,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Supplemental Benefit Utilization and Costs: Units of utilization (Element G)"
+                }
+              },
+              "queryRef": "_Measures.Supplemental Benefit Utilization and Costs: Units of utilization (Element G)",
+              "nativeQueryRef": "Supplemental Benefit Utilization and Costs: Units of utilization (Element G)",
+              "active": true
+            }
+          ]
+        }
+      },
+      "prototypeQuery": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Supplemental Benefit Utilization and Costs: Units of utilization (Element G)"
+                }
+              },
+              "queryRef": "_Measures.Supplemental Benefit Utilization and Costs: Units of utilization (Element G)",
+              "nativeQueryRef": "Supplemental Benefit Utilization and Costs: Units of utilization (Element G)",
+              "active": true
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "Supplemental Benefit Utilization and Costs: Units of utilization (Element G)"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "visualContainerObjects": {
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 0,
+                      "Percent": -0.5
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Supplemental Benefit Utilization and Costs: Units of utilization (Element G)'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

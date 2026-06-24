@@ -34,6 +34,27 @@
           ]
         }
       },
+      "prototypeQuery": {
+        "Indicator": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Adverse Decision Rate"
+                }
+              },
+              "queryRef": "_Measures.Adverse Decision Rate",
+              "nativeQueryRef": "Adverse Decision Rate",
+              "active": true
+            }
+          ]
+        }
+      },
       "sortDefinition": {
         "sort": [
           {

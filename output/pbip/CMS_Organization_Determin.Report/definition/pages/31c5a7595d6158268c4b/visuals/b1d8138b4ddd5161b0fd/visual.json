@@ -34,6 +34,27 @@
           ]
         }
       },
+      "prototypeQuery": {
+        "Indicator": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Missing Data %"
+                }
+              },
+              "queryRef": "_Measures.Missing Data %",
+              "nativeQueryRef": "Missing Data %",
+              "active": true
+            }
+          ]
+        }
+      },
       "sortDefinition": {
         "sort": [
           {

@@ -34,6 +34,27 @@
           ]
         }
       },
+      "prototypeQuery": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Validation Errors"
+                }
+              },
+              "queryRef": "_Measures.Validation Errors",
+              "nativeQueryRef": "Validation Errors",
+              "active": true
+            }
+          ]
+        }
+      },
       "sortDefinition": {
         "sort": [
           {

@@ -1,0 +1,118 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "cd75f7b8eb6b595a9a1b",
+  "position": {
+    "x": 920,
+    "y": 1380,
+    "z": 0,
+    "width": 280,
+    "height": 150,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "D-SNP Transmission of Admission Notifications: Count of hospital and SNF admissions"
+                }
+              },
+              "queryRef": "_Measures.D-SNP Transmission of Admission Notifications: Count of hospital and SNF admissions",
+              "nativeQueryRef": "D-SNP Transmission of Admission Notifications: Count of hospital and SNF admissions",
+              "active": true
+            }
+          ]
+        }
+      },
+      "prototypeQuery": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "D-SNP Transmission of Admission Notifications: Count of hospital and SNF admissions"
+                }
+              },
+              "queryRef": "_Measures.D-SNP Transmission of Admission Notifications: Count of hospital and SNF admissions",
+              "nativeQueryRef": "D-SNP Transmission of Admission Notifications: Count of hospital and SNF admissions",
+              "active": true
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "D-SNP Transmission of Admission Notifications: Count of hospital and SNF admissions"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "visualContainerObjects": {
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 0,
+                      "Percent": -0.5
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'D-SNP Transmission of Admission Notifications: Count of hospital and SNF admissions'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

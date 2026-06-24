@@ -218,6 +218,28 @@ table FactMedication
 			in
 			    #"Changed Type"
 
+table FactRewardsAndIncentives
+	// Description: Rewards and incentives data
+	column RewardID
+		dataType: string
+		sourceColumn: RewardID
+	partition FactRewardsAndIncentives-partition = m
+		mode: import
+		source =
+			let
+			    Source = Table.FromRecords({
+			        [RewardID = "Mock RewardID 1"],
+			        [RewardID = "Mock RewardID 2"],
+			        [RewardID = "Mock RewardID 3"],
+			        [RewardID = "Mock RewardID 4"],
+			        [RewardID = "Mock RewardID 5"]
+			    }),
+			    #"Changed Type" = Table.TransformColumnTypes(Source, {
+			        {"RewardID", type text}
+			    })
+			in
+			    #"Changed Type"
+
 table DimPatient
 	// Description: Demographic and enrollment status details of the Medicare Advantage enrollees.
 	column patient_key

@@ -1,0 +1,118 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "668ed1d2725c5129af0c",
+  "position": {
+    "x": 620,
+    "y": 1040,
+    "z": 0,
+    "width": 280,
+    "height": 150,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Rewards and Incentives Programs: Number of rewards made so far"
+                }
+              },
+              "queryRef": "_Measures.Rewards and Incentives Programs: Number of rewards made so far",
+              "nativeQueryRef": "Rewards and Incentives Programs: Number of rewards made so far",
+              "active": true
+            }
+          ]
+        }
+      },
+      "prototypeQuery": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Rewards and Incentives Programs: Number of rewards made so far"
+                }
+              },
+              "queryRef": "_Measures.Rewards and Incentives Programs: Number of rewards made so far",
+              "nativeQueryRef": "Rewards and Incentives Programs: Number of rewards made so far",
+              "active": true
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "Rewards and Incentives Programs: Number of rewards made so far"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "visualContainerObjects": {
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 0,
+                      "Percent": -0.5
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Rewards and Incentives Programs: Number of rewards made so far'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

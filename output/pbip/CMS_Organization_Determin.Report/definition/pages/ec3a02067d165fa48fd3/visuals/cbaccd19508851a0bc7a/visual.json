@@ -34,6 +34,27 @@
           ]
         }
       },
+      "prototypeQuery": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Average Turnaround Time"
+                }
+              },
+              "queryRef": "_Measures.Average Turnaround Time",
+              "nativeQueryRef": "Average Turnaround Time",
+              "active": true
+            }
+          ]
+        }
+      },
       "sortDefinition": {
         "sort": [
           {

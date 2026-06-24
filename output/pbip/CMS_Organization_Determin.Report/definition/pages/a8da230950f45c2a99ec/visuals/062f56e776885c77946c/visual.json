@@ -53,6 +53,46 @@
           ]
         }
       },
+      "prototypeQuery": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "FactObservation"
+                    }
+                  },
+                  "Property": "disposition"
+                }
+              },
+              "queryRef": "FactObservation.disposition",
+              "nativeQueryRef": "disposition",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Total Org Determinations Override"
+                }
+              },
+              "queryRef": "_Measures.Total Org Determinations Override",
+              "nativeQueryRef": "Total Org Determinations Override",
+              "active": true
+            }
+          ]
+        }
+      },
       "sortDefinition": {
         "sort": [
           {

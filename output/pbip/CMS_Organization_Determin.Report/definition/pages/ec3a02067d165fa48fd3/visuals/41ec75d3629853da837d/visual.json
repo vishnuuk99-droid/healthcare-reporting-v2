@@ -1,0 +1,118 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "41ec75d3629853da837d",
+  "position": {
+    "x": 320,
+    "y": 2230,
+    "z": 0,
+    "width": 280,
+    "height": 150,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "SNP Care Management: Number of reassessments refused (Element G)"
+                }
+              },
+              "queryRef": "_Measures.SNP Care Management: Number of reassessments refused (Element G)",
+              "nativeQueryRef": "SNP Care Management: Number of reassessments refused (Element G)",
+              "active": true
+            }
+          ]
+        }
+      },
+      "prototypeQuery": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "SNP Care Management: Number of reassessments refused (Element G)"
+                }
+              },
+              "queryRef": "_Measures.SNP Care Management: Number of reassessments refused (Element G)",
+              "nativeQueryRef": "SNP Care Management: Number of reassessments refused (Element G)",
+              "active": true
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "SNP Care Management: Number of reassessments refused (Element G)"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "visualContainerObjects": {
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 0,
+                      "Percent": -0.5
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'SNP Care Management: Number of reassessments refused (Element G)'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

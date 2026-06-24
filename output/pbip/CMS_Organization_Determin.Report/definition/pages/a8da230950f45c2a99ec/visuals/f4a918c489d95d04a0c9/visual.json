@@ -24,11 +24,51 @@
                       "Entity": "DimDate"
                     }
                   },
-                  "Property": "month"
+                  "Property": "month_name"
                 }
               },
-              "queryRef": "DimDate.month",
-              "nativeQueryRef": "month",
+              "queryRef": "DimDate.month_name",
+              "nativeQueryRef": "month_name",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Total Org Determinations Override"
+                }
+              },
+              "queryRef": "_Measures.Total Org Determinations Override",
+              "nativeQueryRef": "Total Org Determinations Override",
+              "active": true
+            }
+          ]
+        }
+      },
+      "prototypeQuery": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "DimDate"
+                    }
+                  },
+                  "Property": "month_name"
+                }
+              },
+              "queryRef": "DimDate.month_name",
+              "nativeQueryRef": "month_name",
               "active": true
             }
           ]
@@ -63,7 +103,7 @@
                     "Entity": "DimDate"
                   }
                 },
-                "Property": "month"
+                "Property": "month_name"
               }
             },
             "direction": "Ascending"

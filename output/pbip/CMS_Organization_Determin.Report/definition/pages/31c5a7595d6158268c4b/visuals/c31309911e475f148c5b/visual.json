@@ -34,6 +34,27 @@
           ]
         }
       },
+      "prototypeQuery": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Data Quality Score"
+                }
+              },
+              "queryRef": "_Measures.Data Quality Score",
+              "nativeQueryRef": "Data Quality Score",
+              "active": true
+            }
+          ]
+        }
+      },
       "sortDefinition": {
         "sort": [
           {

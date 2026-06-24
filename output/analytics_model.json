@@ -247,6 +247,24 @@
           "description": "Text description of the drug."
         }
       ]
+    },
+    {
+      "name": "FactRewardsAndIncentives",
+      "description": "Rewards and incentives data",
+      "columns": [
+        {
+          "name": "RewardID",
+          "type": "String",
+          "data_type": "String"
+        }
+      ],
+      "measures": [
+        {
+          "name": "Number_of_rewards_made_so_far",
+          "expression": "COUNTROWS('FactRewardsAndIncentives')"
+        }
+      ],
+      "relationships": []
     }
   ],
   "dimension_tables": [

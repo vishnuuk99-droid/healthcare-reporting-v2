@@ -2846,9 +2846,15 @@ elif page == "📝 Report Definition":
         load_report_definition,
     )
     from modules.analytics_generator import load_analytics_model as _load_am
+    from modules.intent_classifier import load_reporting_intents
 
     decisions = _load_decisions()
     analytics_model = _load_am()
+    reporting_intent = load_reporting_intents()
+    
+    if not reporting_intent:
+        st.warning("⚠️ No reporting intents found. Please complete the Reporting Intent step first.")
+        st.stop()
 
     # ── Context summary ───────────────────────────────────────────────
     ctx1, ctx2, ctx3 = st.columns(3)
@@ -2884,7 +2890,7 @@ elif page == "📝 Report Definition":
                 "Designing Power BI report with Gemini — "
                 "crafting pages, visuals, DAX measures, and drillthrough pages…"
             ):
-                report = generate_report_definition(requirements_json, decisions)
+                report = generate_report_definition(requirements_json, reporting_intent, decisions)
 
             st.session_state["report_definition"] = report.model_dump()
             st.session_state["report_approved"] = False
