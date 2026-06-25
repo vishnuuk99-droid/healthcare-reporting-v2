@@ -1,0 +1,12 @@
+{
+  "sample_dim_date": {
+    "source_type": "excel",
+    "file_path": "C:\\Users\\uvishnu\\.gemini\\antigravity-ide\\scratch\\healthcare_reporting-\\samples\\Healthcare_Sample_Dataset.xlsx",
+    "source_object": "DimDate",
+    "column_mappings": {
+      "date_key": "date_key",
+      "calendar_year": "year",
+      "calendar_month": "month"
+    }
+  }
+}

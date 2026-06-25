@@ -56,9 +56,14 @@ You MUST include these page categories (adapt titles to the data):
 
 **visuals** – each visual has:
   - title: Displayed title
-  - visual_type: One of card, bar_chart, stacked_bar, line_chart,
-    donut_chart, treemap, table, matrix, kpi, gauge, slicer,
-    scatter_chart, waterfall, funnel
+  - visual_type: The structural visual type chosen based on semantic rules:
+    * card: Use for a single scalar metric with no trend or comparison dimension.
+    * kpi: Use only when displaying a primary metric together with a meaningful time trend (Date, Month, Quarter, Year).
+    * line_chart: Use for metrics analyzed over time.
+    * bar_chart: Use for comparisons across categories.
+    * donut_chart: Use for proportional distributions.
+    * matrix: Use for grouped summaries with multiple dimensions.
+    * table: Use for detailed records.
   - dimensions: Columns from the star schema used as axis/legend/rows
   - measures: Measure names or inline DAX expressions
   - business_reason: Why this visual matters
@@ -74,6 +79,8 @@ You MUST include these page categories (adapt titles to the data):
   - page_name, purpose, drillthrough_field, visuals
 
 Rules:
+- Choose the simplest valid visual that satisfies the reporting requirement.
+- If a metric does not include a valid trend dimension, NEVER select a KPI visual.
 - Reference ONLY tables and columns present in the star schema model.
 - You MUST only use measure names that are explicitly defined in the provided PRE-GENERATED DAX MEASURES. Do NOT invent new DAX measures or hallucinate measure names.
 - Do NOT generate inline DAX expressions in the visuals. Only reference the pre-generated measures by their exact name.
@@ -181,6 +188,13 @@ def generate_report_definition(
     )
 
     raw = json.loads(response.text)
+    
+    from modules.report_definition_validator import validate_report_definition
+    validation_errors = validate_report_definition(raw)
+    if validation_errors:
+        error_msg = "\n".join(validation_errors)
+        raise ValueError(f"Report Definition Validation failed. The following visual specifications are structurally invalid:\n{error_msg}")
+
     return ReportDefinition.model_validate(raw)
 
 

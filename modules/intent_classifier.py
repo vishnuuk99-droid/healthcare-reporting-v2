@@ -26,23 +26,18 @@ load_dotenv(_PROJECT_ROOT / ".env")
 _ANALYTICS_MODEL_FILE = OUTPUT_DIR / "analytics_model.json"
 _INTENT_OUTPUT_FILE = OUTPUT_DIR / "reporting_intent.json"
 
-# Intent → recommended visual mapping
-INTENT_VISUAL_MAP = {
-    "detail_listing": "Table",
-    "kpi": "Card",
-    "trend_analysis": "Line Chart",
-    "comparison_analysis": "Bar Chart",
-    "cross_tabulation": "Matrix",
-    "data_submission": "Table + Export",
-    "data_quality": "Table + KPI",
-    "compliance_monitoring": "KPI + Trend",
-}
-
-VALID_INTENTS = list(INTENT_VISUAL_MAP.keys())
+VALID_INTENTS = [
+    "single_metric",
+    "time_series",
+    "categorical_comparison",
+    "distribution",
+    "detailed_records",
+    "grouped_summary",
+]
 
 _SYSTEM_INSTRUCTION = """\
 You are a healthcare reporting analyst specialising in CMS data
-reporting and Power BI design.  You will receive:
+reporting and analytical design. You will receive:
 
 1. CMS reporting requirements (metrics, dimensions, filters, business
    rules, exclusions).
@@ -51,37 +46,18 @@ reporting and Power BI design.  You will receive:
 
 For EACH distinct requirement (metrics, dimensions, business rules,
 filters, exclusions — each individual item), classify its **reporting
-intent** into exactly one of these categories:
+intent** into exactly one of these analytical categories:
 
-- **detail_listing**: The requirement asks to list, enumerate, or
-  display individual records (e.g., "report all OD numbers").
-- **kpi**: The requirement asks for a single summary number or
-  indicator (e.g., "total determinations count").
-- **trend_analysis**: The requirement asks for change over time
-  (e.g., "quarterly volume trends").
-- **comparison_analysis**: The requirement asks to compare groups
-  (e.g., "adverse vs. favorable by contract").
-- **cross_tabulation**: The requirement asks for a pivot/matrix view
-  (e.g., "disposition by requesting party and contract").
-- **data_submission**: The requirement describes a data element
-  that must be submitted (file/upload) to CMS.
-- **data_quality**: The requirement defines a validation check or
-  data quality rule.
-- **compliance_monitoring**: The requirement defines an ongoing
-  compliance obligation or monitoring threshold.
+- **single_metric**: The requirement asks for a single summary number or indicator.
+- **time_series**: The requirement asks for change or trends over time.
+- **categorical_comparison**: The requirement asks to compare groups or categories.
+- **distribution**: The requirement asks for proportional distribution of a whole.
+- **detailed_records**: The requirement asks to list, enumerate, or display individual records.
+- **grouped_summary**: The requirement asks for a pivot/matrix view grouped by multiple dimensions.
 
 For each classified requirement produce:
 - requirement: The exact requirement text.
-- intent: One of the categories above (lowercase with underscores).
-- recommended_visual: The recommended Power BI visual type based on:
-    detail_listing → Table
-    kpi → Card
-    trend_analysis → Line Chart
-    comparison_analysis → Bar Chart
-    cross_tabulation → Matrix
-    data_submission → Table + Export
-    data_quality → Table + KPI
-    compliance_monitoring → KPI + Trend
+- intent: One of the analytical categories above.
 - required_columns: Which star schema columns are needed.
 - reasoning: Brief explanation of why this intent was chosen.
 
@@ -91,8 +67,6 @@ Rules:
 - Use only the intent categories listed above.
 - Reference only columns present in the star schema model.
 - Apply organizational decisions when they affect terminology.
-- Be precise — if a rule is about data accuracy, classify as
-  data_quality, not compliance_monitoring.
 """
 
 

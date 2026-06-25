@@ -223,6 +223,7 @@ class FactTable(BaseModel):
     """A fact table in the star schema."""
 
     name: str = Field(description="Table name (e.g., FactEncounter).")
+    source_id: str = Field(default="", description="Logical identifier linking this table to an application-level data source configuration.")
     source_fhir_resource: str = Field(description="FHIR resource this derives from.")
     description: str = Field(default="", description="Business purpose.")
     grain: str = Field(default="", description="What one row represents.")
@@ -233,6 +234,7 @@ class DimensionTable(BaseModel):
     """A dimension table in the star schema."""
 
     name: str = Field(description="Table name (e.g., DimPatient).")
+    source_id: str = Field(default="", description="Logical identifier linking this table to an application-level data source configuration.")
     source_fhir_resource: str = Field(default="", description="FHIR resource this derives from.")
     description: str = Field(default="", description="Business purpose.")
     columns: list[TableColumn] = Field(default_factory=list, description="Table columns.")
@@ -377,13 +379,9 @@ class ReportingIntent(BaseModel):
 
     requirement: str = Field(description="The CMS requirement text being classified.")
     intent: str = Field(
-        description="Intent category: detail_listing, kpi, trend_analysis, "
-        "comparison_analysis, cross_tabulation, data_submission, "
-        "data_quality, or compliance_monitoring.",
-    )
-    recommended_visual: str = Field(
-        default="",
-        description="Recommended Power BI visual type for this intent.",
+        description="Intent category: single_metric, time_series, "
+        "categorical_comparison, distribution, detailed_records, "
+        "or grouped_summary.",
     )
     required_columns: list[str] = Field(
         default_factory=list,

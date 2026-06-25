@@ -2549,7 +2549,6 @@ elif page == "🎯 Reporting Intent":
         generate_reporting_intents,
         save_reporting_intents,
         load_reporting_intents,
-        INTENT_VISUAL_MAP,
         VALID_INTENTS,
     )
     from modules.analytics_generator import load_analytics_model as _load_am_intent
@@ -2575,16 +2574,11 @@ elif page == "🎯 Reporting Intent":
         )
         st.stop()
 
-    # ── Intent → Visual reference ────────────────────────────────────
-    with st.expander("🗺️ Intent → Visual Recommendation Map", expanded=False):
-        ref_cols = st.columns(2)
-        items = list(INTENT_VISUAL_MAP.items())
-        mid = (len(items) + 1) // 2
-        for idx, (intent, visual) in enumerate(items):
-            col = ref_cols[0] if idx < mid else ref_cols[1]
+    # ── Intent Reference ────────────────────────────────────
+    with st.expander("🗺️ Intent Categories", expanded=False):
+        for intent in VALID_INTENTS:
             label = intent.replace("_", " ").title()
-            with col:
-                st.markdown(f"- **{label}** → `{visual}`")
+            st.markdown(f"- **{label}**")
 
     # ── Generate / Regenerate button ──────────────────────────────────
     st.markdown("---")
@@ -2667,10 +2661,9 @@ elif page == "🎯 Reporting Intent":
 
             for intent_type, items in sorted(intent_groups.items()):
                 label = intent_type.replace("_", " ").title()
-                visual = INTENT_VISUAL_MAP.get(intent_type, "Unknown")
 
                 with st.expander(
-                    f"🎯 {label} — {len(items)} requirements → {visual}",
+                    f"🎯 {label} — {len(items)} requirements",
                     expanded=False,
                 ):
                     for idx, item in enumerate(items):
@@ -2687,7 +2680,6 @@ elif page == "🎯 Reporting Intent":
                             f'<div class="intent-card">'
                             f'<div class="req-text">{item.get("requirement", "")}</div>'
                             f'<span class="intent-badge intent-{intent_cls}">{label}</span>'
-                            f'<span class="visual-rec">{item.get("recommended_visual", visual)}</span>'
                             f'<div style="margin-top:6px">{cols_html}</div>'
                             f'<div style="color:#78716c;font-size:0.75rem;margin-top:6px;">'
                             f'{item.get("reasoning", "")}</div>'
@@ -2723,12 +2715,6 @@ elif page == "🎯 Reporting Intent":
                                     new_intent = VALID_INTENTS[
                                         intent_labels.index(new_intent_label)
                                     ]
-                                    new_visual = INTENT_VISUAL_MAP.get(
-                                        new_intent, "Table"
-                                    )
-                                    st.markdown(
-                                        f"Recommended visual: **{new_visual}**"
-                                    )
 
                                     sub_c, can_c = st.columns(2)
                                     with sub_c:
@@ -2744,7 +2730,6 @@ elif page == "🎯 Reporting Intent":
 
                                     if submitted:
                                         intents_data[global_idx]["intent"] = new_intent
-                                        intents_data[global_idx]["recommended_visual"] = new_visual
                                         intents_data[global_idx]["reasoning"] = (
                                             f"[SME Override] Changed to {new_intent_label}. "
                                             + intents_data[global_idx].get("reasoning", "")
@@ -2761,7 +2746,7 @@ elif page == "🎯 Reporting Intent":
         with tab_table:
             import pandas as pd
             df = pd.DataFrame(intents_data)
-            display_cols = ["requirement", "intent", "recommended_visual", "reasoning"]
+            display_cols = ["requirement", "intent", "reasoning"]
             available = [c for c in display_cols if c in df.columns]
             st.dataframe(
                 df[available],
@@ -2904,7 +2889,17 @@ elif page == "📝 Report Definition":
         except EnvironmentError as env_err:
             st.error(f"⚠️ {env_err}")
         except ValueError as val_err:
-            st.error(f"⚠️ {val_err}")
+            st.error(f"❌ Validation Failed: {val_err}")
+            _get_pipeline_state().update_stage(PIPELINE_STAGES.REPORT_DEFINITION, StageStatus.FAILED)
+            
+            if "report_definition" in st.session_state:
+                del st.session_state["report_definition"]
+                
+            import modules.report_generator as rg
+            if rg._REPORT_DEFINITION_FILE.exists():
+                rg._REPORT_DEFINITION_FILE.unlink()
+                
+            st.stop()
         except Exception as exc:
             st.error(f"❌ Generation failed: {exc}")
 

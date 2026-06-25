@@ -569,7 +569,7 @@ _VISUAL_TYPE_MAP = {
 }
 
 
-def compile_pbip_project() -> dict:
+def compile_pbip_project(datasource_config_path: str = None) -> dict:
     """
     Compile the PBIP project and write files into the official folder structure
     under output/pbip/.  Also creates the compiled ZIP package.
@@ -600,6 +600,15 @@ def compile_pbip_project() -> dict:
         report_def = json.load(f)
     with open(_DAX_ARTIFACTS_FILE, "r", encoding="utf-8") as f:
         dax_list = json.load(f)
+
+    # Load External Datasource Config if provided
+    datasource_config = {}
+    if datasource_config_path and Path(datasource_config_path).exists():
+        try:
+            with open(datasource_config_path, "r", encoding="utf-8") as f:
+                datasource_config = json.load(f)
+        except Exception:
+            pass
 
     intents = []
     if _INTENT_FILE.exists():
@@ -708,6 +717,7 @@ def compile_pbip_project() -> dict:
         tables_list.append({
             "name": fact["name"],
             "description": fact.get("description", ""),
+            "source_id": fact.get("source_id", ""),
             "columns": cols,
             "measures": []
         })
@@ -718,6 +728,7 @@ def compile_pbip_project() -> dict:
         tables_list.append({
             "name": dim["name"],
             "description": dim.get("description", ""),
+            "source_id": dim.get("source_id", ""),
             "columns": cols,
             "measures": []
         })
@@ -736,6 +747,12 @@ def compile_pbip_project() -> dict:
         "columns": [{"name": "_placeholder", "dataType": "string", "sourceColumn": None}],
         "measures": measures_converted
     })
+
+    # Validate physical datasources
+    validation_errors = _validate_datasource(tables_list, datasource_config)
+    if validation_errors:
+        error_msg = "\n".join(validation_errors)
+        raise ValueError(f"Datasource validation failed. The following errors were found:\n{error_msg}")
 
     # Build lookup: dimension table name -> primary key column name
     dim_pk_lookup = {}
@@ -789,7 +806,7 @@ def compile_pbip_project() -> dict:
         tmdl_lines.append("\t\tmode: import")
         tmdl_lines.append("\t\tsource =")
         
-        m_query = _compile_m_partition_query(tbl["name"], tbl["columns"])
+        m_query = _compile_m_partition_query(tbl["name"], tbl["columns"], tbl.get("source_id"), datasource_config)
         for line in m_query.splitlines():
             tmdl_lines.append(f"\t\t\t{line}")
         tmdl_lines.append("")
@@ -844,7 +861,7 @@ def compile_pbip_project() -> dict:
                     "mode": "import",
                     "source": {
                         "type": "m",
-                        "expression": _compile_m_partition_query(tbl["name"], tbl["columns"])
+                        "expression": _compile_m_partition_query(tbl["name"], tbl["columns"], tbl.get("source_id"), datasource_config)
                     }
                 }
             ]
@@ -1197,7 +1214,6 @@ def compile_pbip_project() -> dict:
     file_paths[f"{project_slug}.Report/definition/version.json"] = version_json_path
 
     # Copy StaticResources and .platform to ensure Power BI can open the Enhanced PBIR properly
-    import shutil
     canonical_static = Path("scratch/canonical_pbip/Pharmacy_Claims_Cost_Summary_Report.Report/StaticResources")
     if canonical_static.exists():
         shutil.copytree(canonical_static, report_definition_dir.parent / "StaticResources", dirs_exist_ok=True)
@@ -1829,8 +1845,108 @@ def _generate_mock_table_records(table_name: str, columns: list) -> list:
     return records
 
 
-def _compile_m_partition_query(table_name: str, columns: list) -> str:
-    """Compile conformed mock data into a valid Power Query M query block."""
+def _validate_datasource(tables_list: list, datasource_config: dict) -> list[str]:
+    """Validates that physical data sources satisfy the semantic model."""
+    from modules.datasources import get_adapter, DatasourceValidationError
+    
+    errors = []
+    
+    for tbl in tables_list:
+        source_id = tbl.get("source_id")
+        if not source_id or not datasource_config or source_id not in datasource_config:
+            continue
+            
+        config = datasource_config[source_id]
+        try:
+            adapter = get_adapter(config)
+            source_object = config.get("source_object")
+            if not source_object:
+                errors.append(f"Table '{tbl['name']}': Config for source_id '{source_id}' is missing 'source_object'.")
+                continue
+                
+            physical_columns = adapter.get_schema(source_object)
+            column_mappings = config.get("column_mappings", {})
+            
+            for col in tbl.get("columns", []):
+                semantic_col = col["name"]
+                physical_col = column_mappings.get(semantic_col, semantic_col)
+                if physical_col not in physical_columns:
+                    errors.append(f"Table '{tbl['name']}': Required semantic column '{semantic_col}' mapped to missing physical column '{physical_col}' in source object '{source_object}'.")
+                    
+        except DatasourceValidationError as e:
+            errors.append(f"Table '{tbl['name']}': {e}")
+        except Exception as e:
+            errors.append(f"Table '{tbl['name']}': Unexpected validation error: {e}")
+            
+    return errors
+
+
+def _compile_m_partition_query(table_name: str, columns: list, source_id: str = None, datasource_config: dict = None) -> str:
+    """Compile conformed mock data into a valid Power Query M query block, or use physical datasource if configured."""
+    
+    type_mappings = {
+        "string": "type text",
+        "varchar": "type text",
+        "integer": "Int64.Type",
+        "int": "Int64.Type",
+        "int64": "Int64.Type",
+        "boolean": "type logical",
+        "bool": "type logical",
+        "date": "type date",
+        "datetime": "type datetime",
+        "double": "type number",
+        "float": "type number",
+        "decimal": "type number",
+        "currency": "type number",
+    }
+    
+    # Check if we have a valid physical datasource mapping
+    if source_id and datasource_config and source_id in datasource_config:
+        config = datasource_config[source_id]
+        if config.get("source_type") == "excel":
+            file_path = config.get("file_path", "")
+            source_object = config.get("source_object", "")
+            column_mappings = config.get("column_mappings", {})
+            
+            # Construct the physical M query for Excel
+            escaped_path = file_path.replace('"', '""')
+            escaped_sheet = source_object.replace('"', '""')
+            
+            m_expr = f'''let
+    Source = Excel.Workbook(File.Contents("{escaped_path}"), null, true),
+    Sheet_Data = Source{{[Item="{escaped_sheet}",Kind="Sheet"]}}[Data],
+    #"Promoted Headers" = Table.PromoteHeaders(Sheet_Data, [PromoteAllScalars=true]),'''
+
+            # Rename columns if mappings exist
+            if column_mappings:
+                rename_items = []
+                for semantic_col, physical_col in column_mappings.items():
+                    escaped_semantic = semantic_col.replace('"', '""')
+                    escaped_physical = physical_col.replace('"', '""')
+                    rename_items.append(f'{{"{escaped_physical}", "{escaped_semantic}"}}')
+                
+                rename_block = "{\n        " + ",\n        ".join(rename_items) + "\n    }"
+                m_expr += f'\n    #"Renamed Columns" = Table.RenameColumns(#"Promoted Headers", {rename_block}),'
+                prev_step = '#"Renamed Columns"'
+            else:
+                prev_step = '#"Promoted Headers"'
+            
+            # Transform types
+            transform_items = []
+            for col in columns:
+                col_name = col["name"]
+                col_type = col.get("dataType", col.get("data_type", "string")).lower()
+                m_type = type_mappings.get(col_type, "type text")
+                escaped_col = col_name.replace('"', '""')
+                transform_items.append(f'{{"{escaped_col}", {m_type}}}')
+                
+            transform_block = "{\n        " + ",\n        ".join(transform_items) + "\n    }"
+            m_expr += f'\n    #"Changed Type" = Table.TransformColumnTypes({prev_step}, {transform_block})'
+            m_expr += f'\nin\n    #"Changed Type"'
+            
+            return m_expr
+
+    # Fallback to mock data generation
     records = _generate_mock_table_records(table_name, columns)
     
     m_records = []
